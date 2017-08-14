@@ -1,0 +1,7 @@
+<h1>{{ question.question_text}}</h1>
+<ul>
+  {% for c in question.choice_set.all %}
+  <li>{{ c.choice_test}} -- {{ c.votes }} vote{{ c.votes | pluralize }}</li>
+  {% endfor %}
+</ul>
+<a href="{% url 'polls:index' %}">Voltar</a>
