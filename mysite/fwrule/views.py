@@ -119,7 +119,7 @@ def fwrules_edit(request, fwrule_id):
             redis_write(key_name, json_fwrule)
             run_puppet(group_name)
 
-            return HttpResponseRedirect(reverse('mzbox:fwrules', kwargs={'client_id':fwrule.group_fk.client_fk.pk, 'group_id': fwrule.group_fk.pk}))
+            return HttpResponseRedirect(reverse('fwrule:fwrules', kwargs={'client_id':fwrule.group_fk.client_fk.pk, 'group_id': fwrule.group_fk.pk}))
     else:
        form = FwRuleForm()
        for field in form.fields:
@@ -128,13 +128,13 @@ def fwrules_edit(request, fwrule_id):
            form.fields[field].widget.__dict__['attrs'].update(value_hash) 
 
 
-       return render(request, 'mzbox/fwrules_edit.html', {
+       return render(request, 'fwrule/fwrules_edit.html', {
            'fwrule_id': fwrule_id,
            'form': form,
            })
 
-def fwrules_delete(request, fwrule_id):
-    fwrule = Firewall_rule.objects.get(pk=fwrule_id)
+def fwrules_delete(request):
+    fwrule = Firewall_rule.objects.get(pk=request.POST.get('firewall_id'))
     group_name = fwrule.group_fk.group_name
     client_name = fwrule.group_fk.client_fk.client_name
     fwrule.delete()
@@ -144,6 +144,6 @@ def fwrules_delete(request, fwrule_id):
     redis_write(key_name, json_fwrule)
     run_puppet(group_name)
 
-    return HttpResponseRedirect(reverse('mzbox:fwrules', kwargs={'client_id':fwrule.group_fk.client_fk.pk, 'group_id': fwrule.group_fk.pk}))
+    return HttpResponseRedirect(reverse('fwrule:fwrules', kwargs={'client_id':fwrule.group_fk.client_fk.pk, 'group_id': fwrule.group_fk.pk}))
     
 

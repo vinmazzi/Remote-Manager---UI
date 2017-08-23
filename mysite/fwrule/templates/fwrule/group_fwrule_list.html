@@ -74,7 +74,7 @@
 			<!-- class "auto-inherit-active-class" will automatically add "active" class for parent elements who are marked already with class "active" -->
 			<!-- Search Bar -->
 			<li id="search">
-				<form method="get" action="">
+				<form method="post">
 					<input type="text" name="q" class="search-input" placeholder="Search something..."/>
 					<button type="submit">
 						<i class="entypo-search"></i>
@@ -635,8 +635,7 @@
        <div class="tab-content">
          <div class="tab-pane active" id="home">
            
-           <div class="scrollable" data-height="120">
-             <table class="table table-bordered table-striped datatable" id="table-3">
+             <table class="table table-bordered datatable" id="table-3">
               <thead>
                 <tr>
                   <th>
@@ -658,10 +657,13 @@
               </thead>
               <tbody>
                {% for rule in fwrules %} 
+               <form method="post" id="form-{{rule.pk}}">
+               {% csrf_token %}
                 <tr>
+                  <input type="hidden" name="firewall_id" id="firewall_id_{{rule.pk}}" value="{{rule.pk}}">
                   <td>
                     <div class="checkbox checkbox-replace">
-                      <input type="checkbox" id="{{ rule.pk }}">
+                      <input type="checkbox" name="firewall_id" value="">
                     </div>
                   </td>
                   <td>{{rule.rule_name_text}}</td>
@@ -706,23 +708,45 @@
                   <td>{{ rule.action }}</td>
 
                   <td>
-                    <a href="#" class="btn btn-default btn-sm btn-icon icon-left">
-                      <i class="entypo-pencil"></i>
-                      Edit
-                    </a>
-                    
-                    <a href="#" class="btn btn-danger btn-sm btn-icon icon-left">
+                    <a href="#" onclick="show_modal('4', {{client_id}}, {{group_id}});" class="btn btn-default btn-sm btn-icon icon-left"> <i class="entypo-pencil"></i> Edit </a>
+                    <a href="#" name="form-{{rule.pk}}" class="btn btn-danger btn-sm btn-icon icon-left" onclick="send_or_edit('delete', this.name);">
+
                       <i class="entypo-cancel"></i>
                       Delete
+
                     </a>
 
                   </td>
                 </tr>
+                </form>
                 {%endfor%}
               </tbody>
             </table>
-           </div>
          </div>
+<script type="text/javascript">
+   function show_modal(rule_id, client_id, group_id){
+
+     jQuery('#modal-7').modal('show', {backdrop: 'static'});
+     
+     $.ajax({
+       url: "/fwrule/"+ rule_id +"/edit",
+       success: function(response)
+       {
+         jQuery('#modal-7 .modal-body').html(response);
+       }
+     });
+   }
+</script>
+         <script type="text/javascript">
+function send_or_edit (my_action, my_form) {
+
+  if (my_action == "delete") {
+    document.getElementById(my_form).action = "{% url 'fwrule:fwrule_delete' %}";
+    document.getElementById(my_form).submit();
+  }
+
+}
+         </script>
          <div class="tab-pane" id="profile">
 
       <div class="panel-heading">
@@ -808,6 +832,7 @@
 
  </div>
 </div>
+
 
 <!-- Footer -->
 <footer class="main">
@@ -1020,5 +1045,23 @@
 	<script src="{% static 'assets/js/neon-custom.js' %}"></script>
 	<script src="{% static 'assets/js/neon-demo.js' %}"></script>
 
+<div class="modal fade" id="modal-7">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Dynamic Content</h4>
+      </div>
+      <div class="modal-body">
+
+        Content is loading...
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+   </div>
+</div>
 </body>
 </html>

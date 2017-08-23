@@ -1,0 +1,78 @@
+<div class="panel-heading">
+  <div class="panel-title">
+    Create New Firewall Rule
+  </div>
+</div>
+  <div class="panel-body">
+    <form role="form" class="form-horizontal form-groups-bordered" method="post" action="{% url 'fwrule:fwrule_edit' fwrule_id %} ">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="field-1" class="col-sm-3 control-label">{{ form.rule_name_text.label_tag }}</label>
+
+        <div class="col-sm-5">
+          {{ form.rule_name_text }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="field-1" class="col-sm-3 control-label">{{ form.source.label_tag }}</label>
+
+        <div class="col-sm-5">
+          {{ form.source }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="field-1" class="col-sm-3 control-label">{{ form.destination.label_tag }}</label>
+
+        <div class="col-sm-5">
+          {{ form.destination }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="field-1" class="col-sm-3 control-label">{{ form.proto.label_tag }}</label>
+
+        <div class="col-sm-5">
+          {{ form.proto }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="field-1" class="col-sm-3 control-label">{{ form.chain.label_tag }}</label>
+
+        <div class="col-sm-5">
+          {{ form.chain }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="field-1" class="col-sm-3 control-label">{{ form.action.label_tag }}</label>
+
+        <div class="col-sm-5">
+          {{ form.action }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="field-1" class="col-sm-3 control-label">{{ form.table.label_tag }}</label>
+
+        <div class="col-sm-5">
+          {{ form.table }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="field-1" class="col-sm-3 control-label">{{ form.sport.label_tag }}</label>
+
+        <div class="col-sm-5">
+          {{ form.sport }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="field-1" class="col-sm-3 control-label">{{ form.dport.label_tag }}</label>
+
+        <div class="col-sm-5">
+          {{ form.dport }}
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-5">
+          <button type="submit" class="btn btn-default">Submit</button>
+        </div>
+      </div>
+    </form>
+</div>
