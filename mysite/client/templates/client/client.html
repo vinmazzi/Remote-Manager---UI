@@ -1,0 +1,17 @@
+<form method='post' action="{%url 'client:index'%}">
+  {%csrf_token%}
+  {{form.as_table}}
+  <input type="submit" value="Salvar" />
+</form>
+<br />
+<hr>
+<label>Meus clientes</label>
+{% if error_message %}
+<h1>{{ error_message }}</h1>
+{% else %}
+<ul>
+{% for c in clients %}
+  <li><a href="{% url 'group:index' c.id %}">{{c.client_name}}</a></li>
+{%endfor%}
+</ul>
+{% endif %}
