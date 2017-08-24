@@ -61,12 +61,14 @@ var neonLogin = neonLogin || {};
 											
 					// Send data to the server
 					$.ajax({
-						url: baseurl + 'data/sample-login-form.php',
+						//url: baseurl + 'data/sample-login-form.php',
+						url: baseurl,
 						method: 'POST',
-						dataType: 'json',
+						//dataType: 'json',
 						data: {
 							username: $("input#username").val(),
 							password: $("input#password").val(),
+              csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')['0'].value,
 						},
 						error: function()
 						{

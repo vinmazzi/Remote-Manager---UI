@@ -22,5 +22,6 @@ urlpatterns = [
     url(r'^client/', include('client.urls')),
     url(r'^fwrule/', include('fwrule.urls')),
     url(r'^group/', include('group.urls')),
+    url(r'^', include('login.urls')),
     url(r'^admin/', admin.site.urls),
 ]

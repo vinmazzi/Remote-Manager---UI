@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'login.apps.LoginConfig',
     'fwrule.apps.FwruleConfig',
     'group.apps.GroupConfig',
     'client.apps.ClientConfig',

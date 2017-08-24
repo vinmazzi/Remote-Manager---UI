@@ -15,9 +15,6 @@ from group.models import Group
 from group.forms import GroupForm
 import redis, ast, json, paramiko
 
-def teste(request):
-    return render(request, 'mzbox/index.html')
-
 def run_puppet(group_name):
    ssh = paramiko.SSHClient()
    try:
@@ -55,6 +52,9 @@ def redis_write(key_name, value):
        return HttpResponse(err)
 
 def fwrules(request, client_id, group_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login:index'))
+
     client = Client.objects.get(pk=client_id)
     group = client.group_set.get(pk=group_id)
 
@@ -102,6 +102,9 @@ def fwrules(request, client_id, group_id):
             })
 
 def fwrules_edit(request, fwrule_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login:index'))
+
     fwrule = Firewall_rule.objects.get(pk=fwrule_id)
     group_name = fwrule.group_fk.group_name
     client_name = fwrule.group_fk.client_fk.client_name
@@ -134,6 +137,9 @@ def fwrules_edit(request, fwrule_id):
            })
 
 def fwrules_delete(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login:index'))
+
     fwrule = Firewall_rule.objects.get(pk=request.POST.get('firewall_id'))
     group_name = fwrule.group_fk.group_name
     client_name = fwrule.group_fk.client_fk.client_name

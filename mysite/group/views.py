@@ -9,14 +9,19 @@ from .forms import GroupForm
 
 # Create your views here.
 
+def teste(request):
+    return render(request, 'group/header.html')
+
 def group(request, client_id):
     if not request.user.is_authenticated:
-        return HttpResponse("Sem autenticar não entra.")
+        return HttpResponseRedirect(reverse('login:index'))
     return render(request, 'group/client_groups.html', {
             'client_id': client_id,
         })
 
 def group_create(request, client_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login:index'))
     client = Client.objects.get(pk=client_id)
 
     if request.method == 'POST':
@@ -39,6 +44,8 @@ def group_create(request, client_id):
             })
 
 def group_list_config(request, client_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login:index'))
     client = Client.objects.get(pk=client_id)
     try:
         groups = client.group_set.all()
@@ -52,6 +59,8 @@ def group_list_config(request, client_id):
         })
 
 def group_config(request, group_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login:index'))
     try:
         group = Group.objects.get(pk=group_id)
     except (KeyError, Group.DoesNotExist):
