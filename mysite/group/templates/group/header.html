@@ -9,7 +9,7 @@
 	<meta name="description" content="Neon Admin Panel" />
 	<meta name="author" content="" />
 	
-	<title>Neon | Groups</title>
+	<title>{% block title %}Remote manager{% endblock %}</title>
 	
 
   <link rel="stylesheet" href="{% static 'assets/js/jquery-ui/css/no-theme/jquery-ui-1.10.3.custom.min.css' %}">
@@ -45,7 +45,7 @@
 			<!-- logo -->
 			<div class="logo">
 				<a href="index.html">
-          <img src="{% static 'assets/images/logo@2x.png'%}" width="120" alt="" />
+          <img src="{% static 'assets/images/logo@2x.png' %}" width="120" alt="" />
 				</a>
 			</div>
 			
@@ -95,7 +95,7 @@
         </a>
         <ul>
           <li>
-            <a href="#">
+            <a href="{% url 'node:list' client_id='1'%}">
               <span>List Boxes</span>
             </a>
           </li>
@@ -159,7 +159,7 @@
 				
 				<a href="#" class="dropdown-toggle" data-toggle="dropdown">
 					<img src="{% static 'assets/images/thumb-1@2x.png' %}" alt="" class="img-circle" width="44" />
-					{{ user_name }}
+					Vinicius Mazzi
 				</a>
 				
 				<ul class="dropdown-menu">
@@ -202,3 +202,41 @@
 	
 </div>
 <hr />
+
+{% block content %}
+{% endblock %}
+
+        <footer class="main">
+
+
+	&copy; 2014 <strong>Neon</strong> Admin Theme by <a href="http://laborator.co" target="_blank">Laborator</a>
+
+</footer>	</div>
+
+
+  <link rel="stylesheet" href="{% static 'assets/js/jvectormap/jquery-jvectormap-1.2.2.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/js/rickshaw/rickshaw.min.css' %}">
+
+	<!-- Bottom Scripts -->
+  <script src="{% static 'assets/js/gsap/main-gsap.js' %}"></script>
+	<script src="{% static 'assets/js/jquery-ui/js/jquery-ui-1.10.3.minimal.min.js' %}"></script>
+	<script src="{% static 'assets/js/bootstrap.js' %}"></script>
+	<script src="{% static 'assets/js/joinable.js' %}"></script>
+	<script src="{% static 'assets/js/resizeable.js' %}"></script>
+	<script src="{% static 'assets/js/neon-api.js' %}"></script>
+	<script src="{% static 'assets/js/jvectormap/jquery-jvectormap-1.2.2.min.js' %}"></script>
+	<script src="{% static 'assets/js/jvectormap/jquery-jvectormap-europe-merc-en.js' %}"></script>
+	<script src="{% static 'assets/js/jquery.sparkline.min.js' %}"></script>
+	<script src="{% static 'assets/js/rickshaw/vendor/d3.v3.js' %}"></script>
+	<script src="{% static 'assets/js/rickshaw/rickshaw.min.js' %}"></script>
+	<script src="{% static 'assets/js/raphael-min.js' %}"></script>
+	<script src="{% static 'assets/js/morris.min.js' %}"></script>
+	<script src="{% static 'assets/js/toastr.js' %}"></script>
+	<script src="{% static 'assets/js/neon-chat.js' %}"></script>
+	<script src="{% static 'assets/js/neon-custom.js' %}"></script>
+	<script src="{% static 'assets/js/neon-demo.js' %}"></script>
+
+{% block modals %}
+{% endblock %}
+</body>
+</html>

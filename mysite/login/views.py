@@ -18,7 +18,10 @@ def auth(request):
     return HttpResponseRedirect(reverse('group:index', kwargs={'client_id': '1'}))
 
 def index(request):
-    return render(request, 'login/login.html')
+    if not request.user.is_authenticated:
+        return render(request, 'login/login.html')
+    else:
+        return HttpResponseRedirect(reverse('group:index', kwargs={'client_id': '1'}))
 
 def do_logout(request):
     logout(request)

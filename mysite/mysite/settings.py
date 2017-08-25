@@ -25,12 +25,13 @@ SECRET_KEY = 'x(-1r=a87#oryg4bam(-xb2(-7=^jojsd2s^z==mcqnq8!=2ki'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1','192.168.1.107']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'node.apps.NodeConfig',
     'login.apps.LoginConfig',
     'fwrule.apps.FwruleConfig',
     'group.apps.GroupConfig',

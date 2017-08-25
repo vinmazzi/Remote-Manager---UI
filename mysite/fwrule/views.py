@@ -30,8 +30,15 @@ def fwrules_redis_format(fwrules):
    for f in fwrules:
        dict_f = model_to_dict(f)
        pop_keys = ['rule_name_text', 'group_fk', 'id']
+
        for key,value in dict_f.items():
            if not value: pop_keys.append(key)
+
+       if not dict_f['action'] in {'accept', 'drop', 'reject'}:
+           tmp_value = dict_f['action'].upper()
+           dict_f.pop('action')
+           jump_dict = {'jump': tmp_value}
+           dict_f.update(jump_dict)
    
        for key in pop_keys:
            dict_f.pop(key)

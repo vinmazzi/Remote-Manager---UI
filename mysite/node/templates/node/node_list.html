@@ -1,0 +1,8 @@
+{% for node in nodes%}
+<ul>
+  <li>
+    {{ node.name }}
+  </li>
+</ul>
+{% endfor %}
+<a href="{% url 'node:discovery' client_id=client_id %}">Discovery</a>
