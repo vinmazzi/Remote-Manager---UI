@@ -10,18 +10,24 @@ Dashboard
      <a href="#"><i class="entypo-home"></i>Home</a>
    </li>
    <li>
-     <a href="#">Groups</a>
-   </li>
-   <li>
-     <a href="#">Configure Groups</a>
-   </li>
-   <li>
-     <a href="#">Firewall Rules</a>
+     <a href="#">Boxes</a>
    </li>
    <li class="active">
-     <strong>Create Firewall Rule</strong>
+     <strong>List Boxes</strong>
    </li>
 </ol>
+<h2>List Boxes</h2>
+<br />
+<div class="row">
+  <div class="col-sm-2">
+    <a href="{% url 'node:discovery' client_id=client_id %}">
+				<button type="button" class="btn btn-default btn-icon icon-left">
+				Auto Discovery
+				<i class="entypo-arrows-ccw"></i>
+			</button>
+		</a>
+  </div>
+</div>
 <br />
 
 <table class="table table-bordered datatable" id="table-1">
