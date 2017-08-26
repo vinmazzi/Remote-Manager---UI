@@ -15,6 +15,7 @@ class Node(models.Model):
     dns2_ip = models.CharField(max_length=20, null=True)
     dns_domain = models.CharField(max_length=30, null=True)
     dns_search = models.CharField(max_length=30, null=True)
+    brand_new = models.NullBooleanField()
 
     def __str__(self):
         return self.name

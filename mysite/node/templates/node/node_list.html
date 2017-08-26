@@ -41,13 +41,27 @@ Dashboard
   <tbody>
 {% for node in nodes%}
     <tr class="odd gradeX">
-      <td>{{ node.name }}</td>
-      <td>NA</td>
-      <td>NA</td>
+      <td><a href="#" onclick="show_modal({{ node.pk }});">{{ node.name }}</a></td>
+      <td>{{ node.serial_number }}</td>
+      <td>{{ node.group_fk.group_name }}</td>
     </tr>
 {% endfor %}
   </tbody>
 </table>
+<script type="text/javascript">
+   function show_modal(node_id){
+
+     jQuery('#modal-7').modal('show', {backdrop: 'static'});
+     
+     $.ajax({
+       url: "/node/"+ node_id +"/edit",
+       success: function(response)
+       {
+         jQuery('#modal-7 .modal-body').html(response);
+       }
+     });
+   }
+</script>
 <script type="text/javascript">
 var responsiveHelper;
 var breakpointDefinition = {
@@ -89,6 +103,26 @@ var tableContainer;
 </script>
 {% endblock %}
 
+{% block modals %}
+<div class="modal fade" id="modal-7">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Dynamic Content</h4>
+      </div>
+      <div class="modal-body">
+
+        Content is loading...
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+   </div>
+</div>
+{% endblock %}
 {% block bottom_includes %}
 
   <link rel="stylesheet" href="{% static 'assets/js/datatables/responsive/css/datatables.responsive.css'%}">
