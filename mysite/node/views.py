@@ -5,6 +5,7 @@ from client.models import Client
 from .models import Node
 from .forms import NodeForm
 import urllib.request, urllib, json
+from mysite.utils import Utils
 
 # Create your views here.
 
@@ -52,6 +53,9 @@ def node_edit(request, node_id):
             group_id = request.POST.get('group')
             group = node.client_fk.group_set.get(pk=group_id)
             node.group_fk = group
+            key_name = "{}:{}:group".format(node.client_fk.client_name,node.name)
+            key_value = group.group_name
+            Utils.redis_write(key_name, key_value)
             for key in form.cleaned_data.keys():
                 if form.cleaned_data[key] != None:
                    exec_string = "node.{} = \'{}\'".format(key, form.cleaned_data[key])

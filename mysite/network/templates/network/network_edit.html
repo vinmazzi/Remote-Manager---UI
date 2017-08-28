@@ -1,0 +1,30 @@
+ <div class="panel-body">
+    <form role="form" class="form-horizontal form-groups-bordered" method="post" action="{% url 'network:edit' network_id %} ">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="field-1" class="col-sm-3 control-label">{{ form.network_name.label_tag }}</label>
+        <div class="col-sm-5">
+          {{ form.network_name }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="field-1" class="col-sm-3 control-label">{{ form.network_interface.label_tag }}</label>
+
+        <div class="col-sm-5">
+          {{ form.network_interface }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="field-1" class="col-sm-3 control-label">{{ form.network_description.label_tag }}</label>
+
+        <div class="col-sm-5">
+          {{ form.network_description }}
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-5">
+          <button type="submit" class="btn btn-default">Submit</button>
+        </div>
+      </div>
+    </form>
+</div>

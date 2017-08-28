@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ['127.0.0.1','192.168.1.107']
 # Application definition
 
 INSTALLED_APPS = [
+    'network.apps.NetworkConfig',
     'node.apps.NodeConfig',
     'login.apps.LoginConfig',
     'fwrule.apps.FwruleConfig',
