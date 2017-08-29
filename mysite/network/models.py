@@ -1,5 +1,6 @@
 from django.db import models
 from group.models import Group
+from node.models import Node
 
 # Create your models here.
 
@@ -11,3 +12,14 @@ class Network(models.Model):
 
     def __str__(self):
         return self.network_name
+
+class Interface(models.Model):
+    ipaddress  = models.CharField(max_length=20, null=True)
+    method   = models.CharField(max_length=20)
+    netmask  = models.CharField(max_length=20, null=True)
+    gateway  = models.CharField(max_length=20, null=True)
+    network_fk = models.ForeignKey(Network, on_delete=models.CASCADE, default=0)
+    node_fk = models.ForeignKey(Node, on_delete=models.CASCADE, default=0)
+    
+    def __str__(self):
+        return self.network_fk.network_interface

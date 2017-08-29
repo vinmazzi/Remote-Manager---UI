@@ -35,35 +35,68 @@
           {{ form.serial_number }}
         </div>
       </div>
-
-      <div class="form-group">
-        <label for="field-1" class="col-sm-3 control-label">{{ form.lan1_method.label_tag }}</label>
-
-        <div class="col-sm-5">
-          {{ form.lan1_method }}
+      {% if node.interface_set.count > 0 %}
+        {% for interface in node.interface_set.all %}
+        <div class="form-group">
+          <label for="field-1" class="col-sm-3 control-label">{{ interface.network_fk.network_name}} Method: </label>
+          <div class="col-sm-5">
+            <input type="text" name="{{interface.network_fk.network_name}}_method" value="{{interface.method}}" />
+          </div>
         </div>
-      </div>
-      <div class="form-group">
-        <label for="field-1" class="col-sm-3 control-label">{{ form.lan1_ip.label_tag }}</label>
+        <div class="form-group">
+          <label for="field-1" class="col-sm-3 control-label">{{ interface.network_fk.network_name}} Ip: </label>
 
-        <div class="col-sm-5">
-          {{ form.lan1_ip }}
+          <div class="col-sm-5">
+            <input type="text" name="{{interface.network_fk.network_name}}_ip" value="{{interface.ipaddress}}" />
+          </div>
         </div>
-      </div>
-      <div class="form-group">
-        <label for="field-1" class="col-sm-3 control-label">{{ form.lan1_netmask.label_tag }}</label>
+        <div class="form-group">
+          <label for="field-1" class="col-sm-3 control-label">{{ interface.network_fk.network_name}} Netmask: </label>
 
-        <div class="col-sm-5">
-          {{ form.lan1_netmask }}
+          <div class="col-sm-5">
+            <input type="text" name="{{interface.network_fk.network_name}}_netmask" value="{{interface.netmask}}" />
+          </div>
         </div>
-      </div>
-      <div class="form-group">
-        <label for="field-1" class="col-sm-3 control-label">{{ form.lan1_gateway.label_tag }}</label>
+        <div class="form-group">
+          <label for="field-1" class="col-sm-3 control-label">{{ interface.network_fk.network_name }} Gateway: </label>
 
-        <div class="col-sm-5">
-          {{ form.lan1_gateway }}
+          <div class="col-sm-5">
+            <input type="text" name="{{interface.network_fk.network_name}}_gateway" value="{{interface.gateway}}" />
+          </div>
         </div>
-      </div>
+        {%endfor%}
+      {% else %}
+      <!-- CAI NO ELSE-->
+        {% for network in node.group_fk.network_set.all %}
+        <div class="form-group">
+          <label for="field-1" class="col-sm-3 control-label">{{ network.network_name}} Interface Method: </label>
+          <div class="col-sm-5">
+            <input type="text" name="{{network.network_name}}_method" value=""/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="field-1" class="col-sm-3 control-label">{{ network.network_name}} Ip: </label>
+
+          <div class="col-sm-5">
+            <input type="text" name="{{network.network_name}}_ip" value="" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="field-1" class="col-sm-3 control-label">{{ network.network_name}} Netmask: </label>
+
+          <div class="col-sm-5">
+            <input type="text" name="{{network.network_name}}_netmask" value="" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="field-1" class="col-sm-3 control-label">{{ network.network_name }} Gateway: </label>
+
+          <div class="col-sm-5">
+            <input type="text" name="{{network.network_name}}_gateway" value="" />
+          </div>
+        </div>
+        {% endfor %}
+      {% endif %}
       <div class="form-group">
         <label for="field-1" class="col-sm-3 control-label">{{ form.dns1_ip.label_tag }}</label>
 
