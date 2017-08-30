@@ -35,7 +35,6 @@
           {{ form.serial_number }}
         </div>
       </div>
-      {% if node.interface_set.count > 0 %}
         {% for interface in node.interface_set.all %}
         <div class="form-group">
           <label for="field-1" class="col-sm-3 control-label">{{ interface.network_fk.network_name}} Method: </label>
@@ -65,9 +64,9 @@
           </div>
         </div>
         {%endfor%}
-      {% else %}
       <!-- CAI NO ELSE-->
         {% for network in node.group_fk.network_set.all %}
+        {% if network.network_interface not in interface_set %}
         <div class="form-group">
           <label for="field-1" class="col-sm-3 control-label">{{ network.network_name}} Interface Method: </label>
           <div class="col-sm-5">
@@ -95,8 +94,8 @@
             <input type="text" name="{{network.network_name}}_gateway" value="" />
           </div>
         </div>
+        {% endif %}
         {% endfor %}
-      {% endif %}
       <div class="form-group">
         <label for="field-1" class="col-sm-3 control-label">{{ form.dns1_ip.label_tag }}</label>
 

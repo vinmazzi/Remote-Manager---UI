@@ -117,6 +117,9 @@ def node_edit(request, node_id):
             return HttpResponse(form)
     nodeForm = NodeForm()
     interfaceForm = InterfaceForm()
+    interface_set = []
+    for i in node.interface_set.all():
+        interface_set.append(i.network_fk.network_interface)
     for field in nodeForm.fields:
         value_text = eval("node.%s" %(field))
         value_hash = {'value': value_text}
@@ -130,4 +133,5 @@ def node_edit(request, node_id):
             'groups': node.client_fk.group_set.all(),
             'form': nodeForm,
             'interfaceForm': interfaceForm,
+            'interface_set': interface_set,
         })
