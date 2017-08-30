@@ -8,6 +8,8 @@ from .forms import NetworkForm
 # Create your views here.
 
 def network_list(request, group_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login:index'))
     group = Group.objects.get(pk=group_id)
     if request.method == 'POST':
         form = NetworkForm(request.POST)
@@ -29,6 +31,8 @@ def network_list(request, group_id):
             })
 
 def network_edit(request, network_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login:index'))
     network = Network.objects.get(pk=network_id)
     if request.method == 'POST':
         form = NetworkForm(request.POST)
@@ -49,6 +53,8 @@ def network_edit(request, network_id):
           })
 
 def network_delete(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login:index'))
     network = Network.objects.get(pk=request.POST.get('network_id'))
     group_id = network.group_fk.pk
     network.delete()

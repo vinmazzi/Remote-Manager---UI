@@ -1,5 +1,5 @@
 {% extends 'group/header.html' %}
-{% block title%} Create Groups {% endblock %}
+{% block title%} Configure Groups {% endblock %}
 {% block content %}
 
 
@@ -43,6 +43,123 @@
         <div class="title">
           <h3>Network</h3>
           <p>Configure Group Networks</p>
+        </div>
+      </div>
+    </a>
+	</div>
+	<div class="col-sm-3">
+    <a href="#">
+      <div class="tile-title tile-blue">
+        <div class="icon">
+          <i class="entypo entypo-address"></i>
+        </div>
+        <div class="title">
+          <h3>Routes</h3>
+          <p>Configure Routes</p>
+        </div>
+      </div>
+    </a>
+	</div>
+	<div class="col-sm-3">
+    <a href="#">
+      <div class="tile-title tile-blue">
+        <div class="icon">
+          <i class="entypo entypo-flow-line"></i>
+        </div>
+        <div class="title">
+          <h3>VLAN</h3>
+          <p>Configure VLAN</p>
+        </div>
+      </div>
+    </a>
+	</div>
+	<div class="col-sm-3">
+    <a href="{% url 'dhcp:options' group_id=group.id %}">
+      <div class="tile-title tile-blue">
+        <div class="icon">
+          <i class="entypo entypo-tag"></i>
+        </div>
+        <div class="title">
+          <h3>DHCP</h3>
+          <p>Configure DHCP</p>
+        </div>
+      </div>
+    </a>
+	</div>
+	<div class="col-sm-3">
+    <a href="#">
+      <div class="tile-title tile-blue">
+        <div class="icon">
+          <i class="entypo entypo-docs"></i>
+        </div>
+        <div class="title">
+          <h3>Logs</h3>
+          <p>Configure Logs</p>
+        </div>
+      </div>
+    </a>
+	</div>
+	<div class="col-sm-3">
+    <a href="#">
+      <div class="tile-title tile-blue">
+        <div class="icon">
+          <i class="entypo entypo-cloud"></i>
+        </div>
+        <div class="title">
+          <h3>Proxy</h3>
+          <p>Configure Proxy</p>
+        </div>
+      </div>
+    </a>
+	</div>
+	<div class="col-sm-3">
+    <a href="#">
+      <div class="tile-title tile-blue">
+        <div class="icon">
+          <i class="entypo entypo-globe"></i>
+        </div>
+        <div class="title">
+          <h3>VPN</h3>
+          <p>Configure VPN</p>
+        </div>
+      </div>
+    </a>
+	</div>
+	<div class="col-sm-3">
+    <a href="#">
+      <div class="tile-title tile-blue">
+        <div class="icon">
+          <i class="entypo entypo-note-beamed"></i>
+        </div>
+        <div class="title">
+          <h3>Ambience</h3>
+          <p>Configure Ambience</p>
+        </div>
+      </div>
+    </a>
+	</div>
+	<div class="col-sm-3">
+    <a href="#">
+      <div class="tile-title tile-blue">
+        <div class="icon">
+          <i class="entypo entypo-monitor"></i>
+        </div>
+        <div class="title">
+          <h3>Virtual Server</h3>
+          <p>Configure Virtual Server</p>
+        </div>
+      </div>
+    </a>
+	</div>
+	<div class="col-sm-3">
+    <a href="#">
+      <div class="tile-title tile-blue">
+        <div class="icon">
+          <i class="glyphicon glyphicon-usd"></i>
+        </div>
+        <div class="title">
+          <h3>POS Server</h3>
+          <p>Configure POS</p>
         </div>
       </div>
     </a>

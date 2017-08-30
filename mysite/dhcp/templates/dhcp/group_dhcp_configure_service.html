@@ -1,0 +1,92 @@
+{% extends 'group/header.html' %}
+{% block title%} Configure DHCP {% endblock %}
+{% block content %}
+
+      <ol class="breadcrumb bc-3">
+            <li>
+        <a href="index.html"><i class="entypo-home"></i>Home</a>
+      </li>
+          <li>
+              <a href="layout-api.html">Groups</a>
+          </li>
+          <li>
+            <a href="#">{{ group_name }}</a>
+          </li>
+          <li>
+              <a href="layout-api.html">DHCP</a>
+          </li>
+        <li class="active">
+              <strong>Configure DHCP Service</strong>
+          </li>
+          </ol>
+<div class="row">
+  <div class="col-md-12">
+
+    <div class="panel panel-primary" data-collapsed="0">
+
+      <div class="panel-heading">
+        <div class="panel-title">
+          Configure DHCP
+        </div>
+
+        <div class="panel-options">
+          <a href="#sample-modal" data-toggle="modal" data-target="#sample-modal-dialog-1" class="bg"><i class="entypo-cog"></i></a>
+          <a href="#" data-rel="collapse"><i class="entypo-down-open"></i></a>
+          <a href="#" data-rel="reload"><i class="entypo-arrows-ccw"></i></a>
+        </div>
+      </div>
+
+      <div class="panel-body">
+        <form role="form" class="form-horizontal form-groups-bordered" method="post" action="{%url 'dhcp:config' group_id %}">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">Name Servers</label>
+            <div class="col-sm-5">
+              {{ form.nameservers }}
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">Domain</label>
+            <div class="col-sm-5">
+              {{ form.dnsdomain }}
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">Ntp Servers</label>
+
+            <div class="col-sm-5">
+              {{ form.ntpservers }}
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">Interfaces</label>
+
+            <div class="col-sm-5">
+              {{ form.interfaces }}
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="field-ta" class="col-sm-3 control-label">Pxe Server</label>
+
+            <div class="col-sm-5">
+              {{ form.pxeserver }}
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="field-ta" class="col-sm-3 control-label">Pxe Filename</label>
+
+            <div class="col-sm-5">
+              {{ form.pxefilename }}
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-sm-offset-3 col-sm-5">
+              <button type="submit" class="btn btn-default">Submit</button>
+            </div>
+          </div>
+        </form>
+      </div>
+     </div>
+    </div>
+</div>
+{% endblock %}

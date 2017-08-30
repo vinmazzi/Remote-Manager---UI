@@ -1,0 +1,55 @@
+{% extends 'group/header.html' %}
+{% block title %} Configure DHCP {% endblock %}
+{% block content %}
+
+      <ol class="breadcrumb bc-3">
+            <li>
+        <a href="index.html"><i class="entypo-home"></i>Home</a>
+      </li>
+          <li>
+              <a href="layout-api.html">Groups</a>
+          </li>
+          <li>
+            <a href="#">{{ group.group_name }}</a>
+          </li>
+          <li>
+              <a href="layout-api.html">DHCP</a>
+          </li>
+        <li class="active">
+
+              <strong>Configure DHCP</strong>
+          </li>
+          </ol>
+
+<h2>DHCP Config</h2>
+<br/ >
+<div class="row">
+	<div class="col-sm-3">
+    <a href="{% url 'dhcp:config' group_id=group.pk%}">
+      <div class="tile-title tile-gray">
+        <div class="icon">
+          <i class="entypo entypo-cog"></i>
+        </div>
+        <div class="title">
+          <h3>DHCP Service Config</h3>
+          <p>Configure DHCP service.</p>
+        </div>
+      </div>
+    </a>
+	</div>
+	<div class="col-sm-3">
+    <a href="#">
+      <div class="tile-title tile-gray">
+        <div class="icon">
+          <i class="entypo entypo-archive"></i>
+        </div>
+        <div class="title">
+          <h3>DHCP Pools</h3>
+          <p>Configure DHCP Pools.</p>
+        </div>
+      </div>
+    </a>
+	</div>
+</div>
+<br />
+{% endblock %}
