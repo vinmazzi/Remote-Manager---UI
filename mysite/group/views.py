@@ -36,8 +36,11 @@ def group_create(request, client_id):
             return HttpResponseRedirect(reverse('group:index', kwargs={'client_id':client_id}))
     else:
         form = GroupForm()
-
-
+        for field in form.fields:
+            form.fields[field].widget.__dict__['attrs'].update({'class': 'form-control'})
+            if (field == 'group_description'):
+                form.fields[field].widget.__dict__['attrs'].update({'class': 'form-control autogrow'})
+                form.fields[field].widget.__dict__['attrs'].update({'style': 'height: 48px'})
     return render(request, 'group/client_groups_create.html', {
                 'client_id': client_id,
                 'form': form,

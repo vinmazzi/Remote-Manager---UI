@@ -89,6 +89,8 @@ def fwrules(request, client_id, group_id):
            return HttpResponseRedirect(reverse('fwrule:fwrules', kwargs={'client_id':client_id, 'group_id':group_id}))
     else:
         form = FwRuleForm()
+        for field in form.fields:
+            form.fields[field].widget.__dict__['attrs'].update({'class': 'form-control'})
 
     try:
         fwrules = group.firewall_rule_set.all()
@@ -135,6 +137,7 @@ def fwrules_edit(request, fwrule_id):
        for field in form.fields:
            value_text = eval("fwrule.%s" %(field))
            value_hash = {'value': value_text}
+           form.fields[field].widget.__dict__['attrs'].update({'class': 'form-control'})
            form.fields[field].widget.__dict__['attrs'].update(value_hash) 
 
 

@@ -17,8 +17,8 @@ def dhcp_service_redis_format(dhcp_service):
 
        for key,value in dict_d.items():
            if not value: pop_keys.append(key)
-           if ((type(value) is not int) and (len(value.split(';')) > 1)) or (key in ['dnsdomain','ntpservers', 'interfaces']):
-               dict_d[key] = value.replace(" ","").split(';')
+           if ((type(value) is not int) and (len(value.split(',')) > 1)) or (key in ['dnsdomain','ntpservers', 'interfaces']):
+               dict_d[key] = value.replace(" ","").split(',')
 
        for key in pop_keys:
            dict_d.pop(key)
@@ -74,8 +74,7 @@ def service_config(request, group_id):
         form = DhcpServiceForm(initial=init_hash)
         for field in form.fields:
             if field != "pxeserver":
-                form.fields[field].widget.__dict__['attrs'].update({'class': 'form-control'})
-                form.fields[field].widget.__dict__['attrs'].update({'placeholder': 'value1;value2;valueX'})
+                form.fields[field].widget.__dict__['attrs'].update({'class': 'form-control tagsinput'})
             else:
                 form.fields[field].widget.__dict__['attrs'].update({'class': 'form-control'})
         return render(request, 'dhcp/group_dhcp_configure_service.html', {

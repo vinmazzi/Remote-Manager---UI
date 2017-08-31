@@ -41,7 +41,8 @@ Dashboard
   <tbody>
 {% for node in nodes%}
     <tr class="odd gradeX">
-      <td><a href="#" onclick="show_modal({{ node.pk }});">{{ node.name }}</a></td>
+      <!--   <td><a href="#" onclick="show_modal({{ node.pk }});">{{ node.name }}</a></td>-->
+      <td><a href="{% url 'node:edit' node.pk %}">{{ node.name }}</a></td>
       <td>{{ node.serial_number }}</td>
       <td>{{ node.group_fk.group_name }}</td>
     </tr>

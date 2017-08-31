@@ -19,7 +19,8 @@ def interface_redis_format(interfaces):
        tmp_interface_name = i.network_fk.network_interface
 
        for key,value in dict_i.items():
-           if not value: pop_keys.append(key)
+           if (not value) and (key not in pop_keys):
+               pop_keys.append(key)
 
        for key in pop_keys:
            dict_i.pop(key)
@@ -72,10 +73,10 @@ def node_edit(request, node_id):
         interfaceForm = InterfaceForm(request.POST)
         network_hash = {}
         for network in node.group_fk.network_set.all():
-            method_value = request.POST.get("{}_method".format(network))
-            ip_value = request.POST.get("{}_ip".format(network))
-            netmask_value = request.POST.get("{}_netmask".format(network))
-            gateway_value = request.POST.get("{}_gateway".format(network))
+            method_value = request.POST.get("{}_method".format(network.network_name))
+            ip_value = request.POST.get("{}_ip".format(network.network_name))
+            netmask_value = request.POST.get("{}_netmask".format(network.network_name))
+            gateway_value = request.POST.get("{}_gateway".format(network.network_name))
             if network.network_interface not in str(node.interface_set.all()):
                 node.interface_set.create(
                         method = method_value,
@@ -87,9 +88,14 @@ def node_edit(request, node_id):
             else:
                 iface = node.interface_set.get(network_fk=network)
                 iface.method = method_value
-                iface.ipaddress = ip_value
-                iface.netmask = netmask_value
-                iface.gateway = gateway_value
+                if(iface.method == "dhcp"):
+                   iface.ipaddress = ""
+                   iface.netmask = ""
+                   iface.gateway = ""
+                else:
+                   iface.ipaddress = ip_value
+                   iface.netmask = netmask_value
+                   iface.gateway = gateway_value
                 iface.network_fk = network
                 iface.save()
 
@@ -123,8 +129,10 @@ def node_edit(request, node_id):
     for field in nodeForm.fields:
         value_text = eval("node.%s" %(field))
         value_hash = {'value': value_text}
+        nodeForm.fields[field].widget.__dict__['attrs'].update({'class': 'form-control'})
         nodeForm.fields[field].widget.__dict__['attrs'].update(value_hash)
         if field == "serial_number":
+            nodeForm.fields[field].widget.__dict__['attrs'].update({'class': 'form-control'})
             nodeForm.fields[field].widget.__dict__['attrs'].update({'readonly': True})
 
     return render(request, 'node/node_edit.html', {

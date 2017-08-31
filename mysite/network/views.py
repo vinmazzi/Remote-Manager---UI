@@ -5,6 +5,8 @@ from django.contrib.auth import authenticate, login
 from group.models import Group
 from .models import Network
 from .forms import NetworkForm
+from node.views import interface_redis_format
+from mysite.utils import Utils
 # Create your views here.
 
 def network_list(request, group_id):
@@ -23,6 +25,11 @@ def network_list(request, group_id):
             new_network.save()
             return HttpResponseRedirect(reverse('network:list', kwargs={'group_id':group_id}))
     form = NetworkForm()
+    for field in form.fields:
+        form.fields[field].widget.__dict__['attrs'].update({'class': 'form-control'})
+        if (field == 'network_description'):
+            form.fields[field].widget.__dict__['attrs'].update({'class': 'form-control autogrow'})
+            form.fields[field].widget.__dict__['attrs'].update({'style': 'height: 48px'})
     networks = group.network_set.all()
     return render(request, 'network/group_network_list.html',{
             'group': group,
@@ -58,5 +65,12 @@ def network_delete(request):
     network = Network.objects.get(pk=request.POST.get('network_id'))
     group_id = network.group_fk.pk
     network.delete()
+    group = Group.objects.get(pk=group_id)
+    for node in group.node_set.all():
+        interfaces_json = interface_redis_format(node.interface_set.all())
+        interfaces_key  = "Renner:{}:network_interfaces".format(node.name)
+        Utils.redis_write(interfaces_key, interfaces_json)
 
+    
+    Utils.run_puppet(group.group_name)
     return HttpResponseRedirect(reverse('network:list', kwargs={'group_id': group_id}))
