@@ -49,9 +49,11 @@ def discovery_node(request, client_id):
                 serial_number_query = '["and",["=","name","serial_number"],["~","certname", "{}."]]\n'.format(node['certname'].split('.')[0])
                 serial_number_result = puppetdb_query(serial_number_query)[0]['value']
                 client_name.node_set.create(name=node['certname'].split('.')[0], brand_new=True, serial_number=serial_number_result)
+                Utils.create_certificate(node['certname'].split('.')[0])
     else:
         for node in nodes:
             client_name.node_set.create(name=node['certname'].split('.')[0])
+            Utils.create_certificate(node['certname'])
     return HttpResponseRedirect(reverse('node:list', kwargs={
             'client_id': client_id,
         }))

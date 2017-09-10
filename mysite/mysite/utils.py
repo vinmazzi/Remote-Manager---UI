@@ -19,3 +19,13 @@ class Utils:
            ssh.close
        except Exception as err:
            return HttpResponse(err)
+
+    def create_certificate(node_name):
+       ssh = paramiko.SSHClient()
+       try:
+           ssh.load_system_host_keys()
+           ssh.connect('104.236.61.57', username="vpn", password="ImM@zzi..0256")
+           stdin, stdout,stder = ssh.exec_command("cd /etc/openvpn/easy-rsa; source vars; sudo -E ./build-key {0}; cd keys; sudo ln -s {0}.crt {0}_crt; sudo ln -s {0}.key {0}_key".format(node_name))
+           ssh.close
+       except Exception as err:
+           return HttpResponse(err)

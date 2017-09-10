@@ -1,0 +1,41 @@
+</div>
+  <div class="panel-body">
+    <form role="form" id="dhcp_pool_{{interface_id}}" class="form-horizontal form-groups-bordered" method="post" action="{% url 'dhcp:pool_config' interface_id %} ">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="field-1" class="col-sm-3 control-label">{{ form.domain.label_tag }}</label>
+
+        <div class="col-sm-5">
+          {{ form.domain }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="field-1" class="col-sm-3 control-label">{{ form.network.label_tag }}</label>
+
+        <div class="col-sm-5">
+          {{ form.network }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="field-1" class="col-sm-3 control-label">{{ form.network_range.label_tag }}</label>
+
+        <div class="col-sm-5">
+          {{ form.network_range }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="field-1" class="col-sm-3 control-label">{{ form.mask.label_tag }}</label>
+
+        <div class="col-sm-5">
+          {{ form.mask }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="field-1" class="col-sm-3 control-label">{{ form.gateway.label_tag }}</label>
+
+        <div class="col-sm-5">
+          {{ form.gateway }}
+        </div>
+      </div>
+    </form>
+</div>

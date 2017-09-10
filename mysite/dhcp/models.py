@@ -1,5 +1,6 @@
 from django.db import models
 from group.models import Group
+from network.models import Interface
 from network.models import Network
 
 # Create your models here.
@@ -14,8 +15,9 @@ class Dhcp_service(models.Model):
     dnsdomain = models.CharField(max_length=150, default="N/A")
 
 class Dhcp_pool(models.Model):
-    group_fk = models.ForeignKey(Group, on_delete=models.CASCADE, default=0)
-    network_fk = models.ForeignKey(Network, on_delete=models.CASCADE, default=0)
+    interface_fk = models.ForeignKey(Interface, on_delete=models.CASCADE, default=0)
     mask = models.CharField(max_length=150)
+    domain = models.CharField(max_length=150, default="N/A")
+    network = models.CharField(max_length=150, default="N/A")
     network_range = models.CharField(max_length=150)
     gateway = models.CharField(max_length=150)

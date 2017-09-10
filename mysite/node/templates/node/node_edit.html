@@ -94,21 +94,56 @@ Dashboard
         </div>
       </div>
     </div>
+    <script type="text/javascript">
+       function show_modal(interface_id){
+    
+         jQuery('#modal-7').modal('show', {backdrop: 'static'});
+         
+         document.getElementById("modal_submit").onclick = function () { submit_form(interface_id) }
+
+         $.ajax({
+           url: "/dhcp/" + interface_id + "/pool_config",
+           success: function(response)
+           {
+             jQuery('#modal-7 .modal-body').html(response);
+           }
+         });
+       }
+      function submit_form(interface_id){
+        $("#dhcp_pool_" + interface_id).submit();
+      }
+    </script>
     <script>
      $(document).ready(function() {
     {% for interface in node.interface_set.all %}
 
          if($("#{{interface.network_fk.network_name}}_method").val() == "static"){
-           $("#{{interface.network_fk.network_name}}_collapse").show();
+           $("#{{interface.network_fk.network_name}}_collapse_btn").show();
           }else{
             $("#{{interface.network_fk.network_name}}_collapse").hide();
+            $("#{{interface.network_fk.network_name}}_collapse_btn").hide();
           }
 
          $("#{{interface.network_fk.network_name}}_method").change(function() {
            $("#{{interface.network_fk.network_name}}_collapse").toggle();
+           $("#{{interface.network_fk.network_name}}_collapse_btn").toggle();
           });
 
     {% endfor %}
+      {% for network in node.group_fk.network_set.all %}
+      {% if network.network_interface not in interface_set %}
+      if($("#{{ network.network_name}}_method").val() == "static"){
+           $("#{{network.network_name}}_collapse").show();
+          }else{
+            $("#{{network.network_name}}_collapse").hide();
+          }
+
+         $("#{{network.network_name}}_method").change(function() {
+           $("#{{network.network_name}}_collapse").toggle();
+          });
+
+      {% endif %}
+      {% endfor %}
        });
     </script>
     {% for interface in node.interface_set.all %}
@@ -127,6 +162,12 @@ Dashboard
                 <option value="static"  {% if interface.method == "static" %}selected="true" {% endif %} >Static</option>
                 <option value="dhcp" {% if interface.method == "dhcp" %}selected="true" {% endif %} >Dhcp</option>
               </select>
+            </div>
+            <div id="{{interface.network_fk.network_name}}_collapse_btn" >
+              <a href="#" onclick="show_modal({{interface.pk }})" style="height: 30px;"  class="btn btn-default btn-icon icon-left">
+                <i class="entypo-list-add"></i>
+                Create DHCP Pool
+              </a>
             </div>
           </div>
           <div id="{{interface.network_fk.network_name}}_collapse" >
@@ -155,7 +196,6 @@ Dashboard
          </div>
         </div>
       {%endfor%}
-        <!-- CAI NO ELSE-->
       {% for network in node.group_fk.network_set.all %}
       {% if network.network_interface not in interface_set %}
        <div class="panel panel-primary" data-collapsed="0">
@@ -175,6 +215,7 @@ Dashboard
               </select>
             </div>
           </div>
+          <div id="{{interface.network_fk.network_name}}_collapse" >
           <hr/>
           <div class="form-group">
             <label for="field-1" class="col-sm-3 control-label">{{ network.network_name}} Ip: </label>
@@ -199,6 +240,7 @@ Dashboard
               <input type="text" class="form-control" name="{{network.network_name}}_gateway" value="" />
             </div>
           </div>
+          </div>
         </div>
       </div>
           {% endif %}
@@ -212,7 +254,29 @@ Dashboard
   </div>
 </div>
 {% endblock %}
+{% block modals %}
+<div class="modal fade" id="modal-7">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Dhcp Pool</h4>
+      </div>
+      <div class="modal-body">
 
+        Content is loading...
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <a href="#" onclick="" id="modal_submit" style="height: 30px;"  class="btn btn-info ">
+          Save
+        </a>
+      </div>
+    </div>
+   </div>
+</div>
+{% endblock %}
 {% block bottom_includes %}
 <link rel="stylesheet" href="{% static 'assets/js/datatables/responsive/css/datatables.responsive.css'%}">
 <link rel="stylesheet" href="{% static 'assets/js/select2/select2-bootstrap.css'%}">

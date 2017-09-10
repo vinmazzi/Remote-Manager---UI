@@ -9,6 +9,8 @@ class DhcpServiceForm(forms.Form):
     dnsdomain  = forms.CharField(max_length=150)
 
 class DhcpPoolForm(forms.Form):
-    mask    = forms.CharField(max_length=150)
-    gateway = forms.CharField(max_length=150)
-    network_range = forms.CharField(max_length=150)
+    domain = forms.CharField(max_length=150)
+    network = forms.CharField(max_length=150)
+    mask    = forms.CharField(label="Netmask", max_length=150)
+    gateway = forms.CharField(label="Gateway", max_length=150)
+    network_range = forms.CharField(label="Network Range", max_length=150)
