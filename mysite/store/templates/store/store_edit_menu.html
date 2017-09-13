@@ -1,0 +1,49 @@
+{% extends 'group/header.html' %}
+{% block title %} Configure DHCP {% endblock %}
+{% block content %}
+
+      <ol class="breadcrumb bc-3">
+            <li>
+        <a href="index.html"><i class="entypo-home"></i>Home</a>
+      </li>
+          <li>
+              <a href="layout-api.html">Stores</a>
+          </li>
+        <li class="active">
+
+              <strong>Configure Store</strong>
+          </li>
+          </ol>
+
+          <h2>Configure Store {{ store.name }}</h2>
+<br/ >
+<div class="row">
+	<div class="col-sm-3">
+    <a href="{% url 'store:edit' store.pk %}">
+      <div class="tile-title tile-gray">
+        <div class="icon">
+          <i class="entypo entypo-cog"></i>
+        </div>
+        <div class="title">
+          <h3>Configure Store</h3>
+          <p>Edit store information.</p>
+        </div>
+      </div>
+    </a>
+	</div>
+	<div class="col-sm-3">
+    <a href="#">
+      <div class="tile-title tile-gray">
+        <div class="icon">
+          <i class="entypo entypo-archive"></i>
+        </div>
+        <div class="title">
+          <h3>Store Boxes</h3>
+          <p>List Store Boxes.</p>
+        </div>
+      </div>
+    </a>
+	</div>
+</div>
+<br />
+{% endblock %}

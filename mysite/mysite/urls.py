@@ -18,6 +18,7 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^', include('login.urls')),
+    url(r'^store/', include('store.urls')),
     url(r'^dhcp/', include('dhcp.urls')),
     url(r'^network/', include('network.urls')),
     url(r'^polls/', include('polls.urls')),

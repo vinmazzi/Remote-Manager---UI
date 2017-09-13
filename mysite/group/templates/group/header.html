@@ -84,10 +84,28 @@
 			</li>
       <!-- <li class="active opened active"> -->
 			<li>
-				<a href="index.html">
+				<a href="#">
 					<i class="entypo-gauge"></i>
           <span>Dashboard</span>
 				</a>
+			</li>
+			<li>
+        <a href="#">
+				  <i class="entypo-basket"></i>
+          <span>Stores</span>
+        </a>
+        <ul>
+          <li>
+            <a href="{% url 'store:list' client_id='1' %}">
+              <span>List Stores</span>
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'store:create' client_id='1' %}">
+              <span>Create Store</span>
+            </a>
+          </li>
+        </ul>
 			</li>
 			<li>
         <a href="#">
@@ -96,17 +114,17 @@
         </a>
         <ul>
           <li>
-            <a href="{% url 'node:list' client_id='1' %}">
-              <span>List Boxes</span>
-            </a>
-          </li>
-          <li>
             <a href="#">
               <span>Add Box</span>
             </a>
           </li>
+          <li>
+            <a href="{% url 'node:list' client_id='1' %}">
+              <span>List Boxes</span>
+            </a>
+          </li>
         </ul>
-			</li>
+      </li>
 			<li>
         <a href="#">
 				  <i class="entypo-layout"></i>
