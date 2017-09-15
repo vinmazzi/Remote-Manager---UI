@@ -35,6 +35,7 @@ Dashboard
     <tr>
       <th data-hide="phone">Node Name</th>
       <th>Serial Number</th>
+      <th>Store</th>
       <th data-hide="phone">Group</th>
     </tr>
   </thead>
@@ -44,6 +45,7 @@ Dashboard
       <!--   <td><a href="#" onclick="show_modal({{ node.pk }});">{{ node.name }}</a></td>-->
       <td><a href="{% url 'node:edit' node.pk %}">{{ node.name }}</a></td>
       <td>{{ node.serial_number }}</td>
+      <td>{{ node.store_fk.name }}</td>
       <td>{{ node.group_fk.group_name }}</td>
     </tr>
 {% endfor %}

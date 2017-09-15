@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from client.models import Client
+from store.models import Store
 from .models import Node
 from .forms import NodeForm
 from network.forms import InterfaceForm
@@ -58,6 +59,84 @@ def discovery_node(request, client_id):
             'client_id': client_id,
         }))
     
+def node_create(request, store_id):
+    try:
+        store = Store.objects.get(pk=store_id)
+    except:
+        return HttpResponse(store_id)
+    client = store.client_fk
+    if request.method == "POST":
+        form = NodeForm(request.POST)
+        if form.is_valid():
+            node = Node.objects.create(
+                        name = form.cleaned_data['name'],
+                        serial_number = form.cleaned_data['serial_number'],
+                        client_fk = store.client_fk,
+                        group_fk = store.group_fk,
+                        store_fk = store,
+                        dns1_ip = form.cleaned_data['dns1_ip'],
+                        dns2_ip = form.cleaned_data['dns2_ip'],
+                        dns_domain = form.cleaned_data['dns_domain'],
+                        dns_search = form.cleaned_data['dns_domain'],
+                    )
+            key_name = "{}:{}:group".format(node.client_fk.client_name,node.name)
+            key_value = store.group_fk.group_name
+            Utils.redis_write(key_name, key_value)
+            for network in node.group_fk.network_set.all():
+                method_value = request.POST.get("{}_method".format(network.network_name))
+                ip_value = request.POST.get("{}_ip".format(network.network_name))
+                netmask_value = request.POST.get("{}_netmask".format(network.network_name))
+                gateway_value = request.POST.get("{}_gateway".format(network.network_name))
+                if network.network_interface not in str(node.interface_set.all()):
+                    node.interface_set.create(
+                            method = method_value,
+                            ipaddress = ip_value,
+                            netmask = netmask_value,
+                            gateway = gateway_value,
+                            network_fk = network, 
+                            )
+                else:
+                    iface = node.interface_set.get(network_fk=network)
+                    iface.method = method_value
+                    if(iface.method == "dhcp"):
+                       iface.ipaddress = ""
+                       iface.netmask = ""
+                       iface.gateway = ""
+                    else:
+                       iface.ipaddress = ip_value
+                       iface.netmask = netmask_value
+                       iface.gateway = gateway_value
+                    iface.network_fk = network
+                    iface.save()
+            interfaces_json = interface_redis_format(node.interface_set.all())
+            interfaces_key = "{}:{}:network_interfaces".format(node.client_fk.client_name, node.name)
+            Utils.redis_write(interfaces_key, interfaces_json)
+
+            razor_tag_data = json.dumps({'name':node.name, 'rule': ["=",["fact","serialnumber"],node.serial_number]})
+            razor_policy_data = json.dumps({"name": node.name, "repo": "centos7", "task": "centos", "broker": "puppet", "enabled": True,
+                    "hostname": "{}.{}".format(node.name, node.dns_search),"root_password": "secret", "max_count": 20, "tags": [node.name] }) 
+            Utils.razor_write(razor_tag_data, 'create-tag')
+            Utils.razor_write(razor_policy_data, 'create-policy')
+            return HttpResponseRedirect(reverse('node:create', kwargs={'store_id': store_id}))
+    if not store.node_set.all():
+        node_name = "{}{}box0".format(client.client_alias,store.code)
+    else:
+        node_name = "{}{}box{}".format(client.client_alias, store.code, len(store.node_set.all()))
+    form = NodeForm(initial={'name': node_name})
+    for field in form.fields:
+        if field == "name":
+            form.fields[field].widget.__dict__['attrs'].update({'class': 'form-control'})
+            form.fields[field].widget.__dict__['attrs'].update({'readonly': True})
+
+        form.fields[field].widget.__dict__['attrs'].update({'class': 'form-control'})
+    return render(request, 'node/node_create.html', {
+        'client_id': client.pk,
+        'store': store,
+        'group': store.group_fk,
+        'form': form,
+        'interface_set': [],
+        })
+
 def node_list(request, client_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login:index'))
@@ -133,7 +212,7 @@ def node_edit(request, node_id):
         value_hash = {'value': value_text}
         nodeForm.fields[field].widget.__dict__['attrs'].update({'class': 'form-control'})
         nodeForm.fields[field].widget.__dict__['attrs'].update(value_hash)
-        if field == "serial_number":
+        if field == "serial_number" or field == "name":
             nodeForm.fields[field].widget.__dict__['attrs'].update({'class': 'form-control'})
             nodeForm.fields[field].widget.__dict__['attrs'].update({'readonly': True})
 

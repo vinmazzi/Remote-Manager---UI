@@ -1,4 +1,5 @@
 {% extends 'group/header.html' %}
+{% load static %}
 {% block title%} Store {% endblock %}
 {% block content %}
 
@@ -53,6 +54,23 @@
             </div>
           </div>
           <div class="form-group">
+            <label class="col-sm-3 control-label">Group:</label>
+            <div class="col-sm-4">
+              <select class="select2" data-first-option="false" data-allow-clear="true" data-placeholder="Select a Group" name="group">
+                <option></option>
+                <optgroup label="Available Groups">
+                {% for group in groups %}
+                {% if store.group_fk.pk == group.pk %}
+                <option selected="True" value="{{group.pk}}">{{ group.group_name }}</option>
+                {%else%}
+                <option value="{{group.pk}}">{{ group.group_name }}</option>
+                {%endif%}
+                {% endfor %}
+                </optgroup>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
             <label for="field-1" class="col-sm-3 control-label">{{ form.country.label_tag }}</label>
 
             <div class="col-sm-4">
@@ -90,4 +108,34 @@
      </div>
     </div>
 </div>
+{% endblock %}
+
+{% block bottom_includes %}
+<link rel="stylesheet" href="{% static 'assets/js/datatables/responsive/css/datatables.responsive.css' %}">
+<link rel="stylesheet" href="{% static 'assets/js/select2/select2-bootstrap.css' %}">
+<link rel="stylesheet" href="{% static 'assets/js/select2/select2.css' %}">
+<link rel="stylesheet" href="{% static 'assets/js/selectboxit/jquery.selectBoxIt.css'%}">
+<link rel="stylesheet" href="{% static 'assets/js/icheck/skins/minimal/_all.css'%}">
+<link rel="stylesheet" href="{% static 'assets/js/icheck/skins/square/_all.css'%}">
+<link rel="stylesheet" href="{% static 'assets/js/icheck/skins/flat/_all.css'%}">
+<link rel="stylesheet" href="{% static 'assets/js/icheck/skins/futurico/futurico.css'%}">
+<link rel="stylesheet" href="{% static 'assets/js/icheck/skins/polaris/polaris.css'%}">
+<script src="{% static 'assets/js/gsap/main-gsap.js'%}"></script>
+<script src="{% static 'assets/js/jquery-ui/js/jquery-ui-1.10.3.minimal.min.js'%}"></script>
+<script src="{% static 'assets/js/bootstrap.js'%}"></script>
+<script src="{% static 'assets/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'assets/js/joinable.js'%}"></script>
+<script src="{% static 'assets/js/resizeable.js'%}"></script>
+<script src="{% static 'assets/js/neon-api.js'%}"></script>
+<script src="{% static 'assets/js/jquery.dataTables.min.js'%}"></script>
+<script src="{% static 'assets/js/selectboxit/jquery.selectBoxIt.min.js'%}"></script>
+<script src="{% static 'assets/js/datatables/TableTools.min.js'%}"></script>
+<script src="{% static 'assets/js/dataTables.bootstrap.js'%}"></script>
+<script src="{% static 'assets/js/datatables/jquery.dataTables.columnFilter.js'%}"></script>
+<script src="{% static 'assets/js/datatables/lodash.min.js'%}"></script>
+<script src="{% static 'assets/js/datatables/responsive/js/datatables.responsive.js'%}"></script>
+<script src="{% static 'assets/js/select2/select2.min.js'%}"></script>
+<script src="{% static 'assets/js/neon-chat.js'%}"></script>
+<script src="{% static 'assets/js/neon-custom.js'%}"></script>
+<script src="{% static 'assets/js/neon-demo.js'%}"></script>
 {% endblock %}

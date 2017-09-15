@@ -32,7 +32,7 @@
     </a>
 	</div>
 	<div class="col-sm-3">
-    <a href="#">
+    <a href="{% url 'store:boxes' store.pk %}">
       <div class="tile-title tile-gray">
         <div class="icon">
           <i class="entypo entypo-archive"></i>
@@ -40,6 +40,19 @@
         <div class="title">
           <h3>Store Boxes</h3>
           <p>List Store Boxes.</p>
+        </div>
+      </div>
+    </a>
+	</div>
+	<div class="col-sm-3">
+    <a href="{% url 'node:create' store.pk %}">
+      <div class="tile-title tile-gray">
+        <div class="icon">
+          <i class="entypo entypo-plus-circled"></i>
+        </div>
+        <div class="title">
+          <h3>Add Box</h3>
+          <p>Add Box to the store.</p>
         </div>
       </div>
     </a>

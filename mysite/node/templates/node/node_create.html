@@ -1,0 +1,278 @@
+{% extends 'group/header.html' %}
+{% load static %}
+{% block title %}
+Dashboard
+{% endblock %}
+
+{% block content %}
+<ol class="breadcrumb bc-3">
+   <li>
+     <a href="#"><i class="entypo-home"></i>Home</a>
+   </li>
+   <li>
+     <a href="#">Boxes</a>
+   </li>
+   <li class="active">
+     <strong>Add Node</strong>
+   </li>
+</ol>
+
+<h2>
+  Add Node
+</h2>
+<br/>
+<form role="form" class="form-horizontal form-groups-bordered" method="post" action="{% url 'node:create' store.pk %} ">
+{% csrf_token %}
+<div class="panel panel-primary" data-collapsed="0">
+  <div class="panel-heading">
+    <div class="panel-title">
+      Node Details
+    </div>
+  </div>
+    <div class="panel-body">
+        <div class="form-group">
+          <label for="field-1" class="col-sm-3 control-label">{{ form.name.label_tag }}</label>
+  
+          <div class="col-sm-5">
+            {{ form.name }}
+          </div>
+        </div>
+        <hr/>
+        <div class="form-group">
+          <label class="col-sm-3 control-label">Store:</label>
+          <div class="col-sm-5">
+            <select disabled name="store" class="select2" data-placeholder="Select one store to place the node...">
+              <option></option>
+              <optgroup label="Available stores">
+              <option selected="True" value="{{store.pk}}">{{ store.name }}</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+        <hr/>
+        <div class="form-group">
+          <label for="field-1" class="col-sm-3 control-label">{{ form.serial_number.label_tag }}</label>
+  
+          <div class="col-sm-5">
+            {{ form.serial_number }}
+          </div>
+        </div>
+        <hr/>
+        <div class="form-group">
+          <label for="field-1" class="col-sm-3 control-label">{{ form.dns1_ip.label_tag }}</label>
+  
+          <div class="col-sm-5">
+            {{ form.dns1_ip }}
+          </div>
+        </div>
+        <hr/>
+        <div class="form-group">
+          <label for="field-1" class="col-sm-3 control-label">{{ form.dns2_ip.label_tag }}</label>
+  
+          <div class="col-sm-5">
+            {{ form.dns2_ip }}
+          </div>
+        </div>
+        <hr/>
+        <div class="form-group">
+          <label for="field-1" class="col-sm-3 control-label">{{ form.dns_domain.label_tag }}</label>
+  
+          <div class="col-sm-5">
+            {{ form.dns_domain }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+       function show_modal(interface_id){
+    
+         jQuery('#modal-7').modal('show', {backdrop: 'static'});
+         
+         document.getElementById("modal_submit").onclick = function () { submit_form(interface_id) }
+
+         $.ajax({
+           url: "/dhcp/" + interface_id + "/pool_config",
+           success: function(response)
+           {
+             jQuery('#modal-7 .modal-body').html(response);
+           }
+         });
+       }
+      function submit_form(interface_id){
+        $("#dhcp_pool_" + interface_id).submit();
+      }
+    </script>
+    <script>
+     $(document).ready(function() {
+    {% for interface in node.interface_set.all %}
+
+         if($("#{{interface.network_fk.network_name}}_method").val() == "static"){
+           $("#{{interface.network_fk.network_name}}_collapse_btn").show();
+          }else{
+            $("#{{interface.network_fk.network_name}}_collapse").hide();
+            $("#{{interface.network_fk.network_name}}_collapse_btn").hide();
+          }
+
+         $("#{{interface.network_fk.network_name}}_method").change(function() {
+           $("#{{interface.network_fk.network_name}}_collapse").toggle();
+           $("#{{interface.network_fk.network_name}}_collapse_btn").toggle();
+          });
+
+    {% endfor %}
+      {% for network in group.network_set.all %}
+      {% if network.network_interface not in interface_set %}
+         if($("#{{ network.network_name}}_method").val() == "static"){
+              $("#{{network.network_name}}_collapse").show();
+         }else{
+               $("#{{network.network_name}}_collapse").hide();
+         }
+
+         $("#{{network.network_name}}_method").change(function() {
+           if($("#{{ network.network_name}}_method").val() == "static"){
+              $("#{{network.network_name}}_collapse").show();
+            }else{
+              $("#{{network.network_name}}_collapse").hide();
+           }
+          });
+
+      {% endif %}
+      {% endfor %}
+       });
+    </script>
+    {% for interface in node.interface_set.all %}
+       <div class="panel panel-primary" data-collapsed="0">
+         <div class="panel-heading">
+           <div class="panel-title">
+             {{interface.network_fk.network_name}}
+           </div>
+         </div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">{{ interface.network_fk.network_name}} Method: </label>
+            <div class="col-sm-5">
+              <select  class="selectboxit" data-first-option="false" id="{{interface.network_fk.network_name}}_method" name="{{interface.network_fk.network_name}}_method">
+						  	<option>Methods</option>
+                <option value="static"  {% if interface.method == "static" %}selected="true" {% endif %} >Static</option>
+                <option value="dhcp" {% if interface.method == "dhcp" %}selected="true" {% endif %} >Dhcp</option>
+              </select>
+            </div>
+            <div id="{{interface.network_fk.network_name}}_collapse_btn" >
+              <a href="#" onclick="show_modal({{interface.pk }})" style="height: 30px;"  class="btn btn-default btn-icon icon-left">
+                <i class="entypo-list-add"></i>
+                Create DHCP Pool
+              </a>
+            </div>
+          </div>
+          <div id="{{interface.network_fk.network_name}}_collapse" >
+          <hr/>
+            <div class="form-group">
+              <label for="field-1" class="col-sm-3 control-label">{{ interface.network_fk.network_name}} Ip: </label>
+              <div class="col-sm-5">
+                <input type="text" class="form-control" name="{{interface.network_fk.network_name}}_ip" value="{{interface.ipaddress}}" />
+              </div>
+            </div>
+            <hr/>
+            <div class="form-group">
+              <label for="field-1" class="col-sm-3 control-label">{{ interface.network_fk.network_name}} Netmask: </label>
+              <div class="col-sm-5">
+                <input type="text" class="form-control" name="{{interface.network_fk.network_name}}_netmask" value="{{interface.netmask}}" />
+              </div>
+            </div>
+            <hr/>
+            <div class="form-group">
+              <label for="field-1" class="col-sm-3 control-label">{{ interface.network_fk.network_name }} Gateway: </label>
+              <div class="col-sm-5">
+                <input type="text" class="form-control" name="{{interface.network_fk.network_name}}_gateway" value="{{interface.gateway}}" />
+              </div>
+            </div>
+          </div>
+         </div>
+        </div>
+      {%endfor%}
+      {% for network in group.network_set.all %}
+      {% if network.network_interface not in interface_set %}
+       <div class="panel panel-primary" data-collapsed="0">
+         <div class="panel-heading">
+           <div class="panel-title">
+             {{ network.network_name }}
+           </div>
+         </div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">{{ network.network_name}} Interface Method: </label>
+            <div class="col-sm-5">
+              <select class="selectboxit" data-first-option="false" id="{{network.network_name}}_method" name="{{network.network_name}}_method">
+						  	<option>Methods</option>
+                <option value="static">Static</option>
+                <option value="dhcp">Dhcp</option>
+              </select>
+            </div>
+          </div>
+          <div id="{{network.network_name}}_collapse" >
+          <hr/>
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">{{ network.network_name}} Ip: </label>
+  
+            <div class="col-sm-5">
+              <input type="text" class="form-control" name="{{network.network_name}}_ip" value="" />
+            </div>
+          </div>
+          <hr/>
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">{{ network.network_name}} Netmask: </label>
+  
+            <div class="col-sm-5">
+              <input type="text" class="form-control" name="{{network.network_name}}_netmask" value="" />
+            </div>
+          </div>
+          <hr/>
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">{{ network.network_name }} Gateway: </label>
+  
+            <div class="col-sm-5">
+              <input type="text" class="form-control" name="{{network.network_name}}_gateway" value="" />
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+          {% endif %}
+          {% endfor %}
+        <div class="form-group">
+          <div class="col-sm-offset-3 col-sm-5">
+            <button type="submit" class="btn btn-default">Submit</button>
+          </div>
+        </div>
+      </form>
+  </div>
+</div>
+{% endblock %}
+{% block bottom_includes %}
+<link rel="stylesheet" href="{% static 'assets/js/datatables/responsive/css/datatables.responsive.css'%}">
+<link rel="stylesheet" href="{% static 'assets/js/select2/select2-bootstrap.css'%}">
+<link rel="stylesheet" href="{% static 'assets/js/select2/select2.css'%}">
+<link rel="stylesheet" href="{% static 'assets/js/selectboxit/jquery.selectBoxIt.css'%}">
+<link rel="stylesheet" href="{% static 'assets/js/icheck/skins/minimal/_all.css'%}">
+<link rel="stylesheet" href="{% static 'assets/js/icheck/skins/square/_all.css'%}">
+<link rel="stylesheet" href="{% static 'assets/js/icheck/skins/flat/_all.css'%}">
+<link rel="stylesheet" href="{% static 'assets/js/icheck/skins/futurico/futurico.css'%}">
+<link rel="stylesheet" href="{% static 'assets/js/icheck/skins/polaris/polaris.css'%}">
+<script src="{% static 'assets/js/gsap/main-gsap.js'%}"></script>
+<script src="{% static 'assets/js/jquery-ui/js/jquery-ui-1.10.3.minimal.min.js'%}"></script>
+<script src="{% static 'assets/js/bootstrap.js'%}"></script>
+<script src="{% static 'assets/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'assets/js/joinable.js'%}"></script>
+<script src="{% static 'assets/js/resizeable.js'%}"></script>
+<script src="{% static 'assets/js/neon-api.js'%}"></script>
+<script src="{% static 'assets/js/jquery.dataTables.min.js'%}"></script>
+<script src="{% static 'assets/js/selectboxit/jquery.selectBoxIt.min.js'%}"></script>
+<script src="{% static 'assets/js/datatables/TableTools.min.js'%}"></script>
+<script src="{% static 'assets/js/dataTables.bootstrap.js'%}"></script>
+<script src="{% static 'assets/js/datatables/jquery.dataTables.columnFilter.js'%}"></script>
+<script src="{% static 'assets/js/datatables/lodash.min.js'%}"></script>
+<script src="{% static 'assets/js/datatables/responsive/js/datatables.responsive.js'%}"></script>
+<script src="{% static 'assets/js/select2/select2.min.js'%}"></script>
+<script src="{% static 'assets/js/neon-chat.js'%}"></script>
+<script src="{% static 'assets/js/neon-custom.js'%}"></script>
+<script src="{% static 'assets/js/neon-demo.js'%}"></script>
+{% endblock %}

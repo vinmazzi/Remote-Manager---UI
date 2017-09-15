@@ -1,6 +1,13 @@
-import redis, paramiko
+import redis, paramiko, json, requests
+from django.http import HttpResponse, HttpResponseRedirect
 
 class Utils:
+    def razor_write(data_json, command):
+       url = "http://192.168.122.38:8150/api/commands/{}".format(command)
+       #json_data = json.dumps({'name':'teste2', 'rule': ["=",["fact","serialnumber"],"MeuSerialEEETRYHS-44"]})
+       r = requests.post(url, data=data_json, headers={'Content-Type':'application/json'})
+       return r
+
     def redis_write(key_name, value):
        host_ip = "192.168.122.132"
        tcp_port = 6379
