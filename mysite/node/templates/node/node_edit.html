@@ -47,7 +47,7 @@ Dashboard
         <div class="form-group">
           <label class="col-sm-3 control-label">Group:</label>
           <div class="col-sm-5">
-            <select class="select2" data-first-option="false" name="group">
+            <select disabled class="select2" data-first-option="false" name="group">
               <optgroup label="Available Groups">
               {% for group in groups %}
               {% if node.group_fk.pk == group.pk %}
