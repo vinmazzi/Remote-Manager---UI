@@ -35,6 +35,7 @@ Dashboard
     <tr>
       <th data-hide="phone">Store Name</th>
       <th>Store Code</th>
+      <th>Store Group</th>
       <th data-hide="phone">Store Address</th>
     </tr>
   </thead>
@@ -43,6 +44,7 @@ Dashboard
     <tr class="odd gradeX">
       <td><a href="{% url 'store:edit_menu' store.pk %}">{{ store.name }}</a></td>
       <td>{{ store.code }}</td>
+      <td>{{ store.group_fk.group_name }}</td>
       <td>{{ store.address }}</td>
     </tr>
 {% endfor %}

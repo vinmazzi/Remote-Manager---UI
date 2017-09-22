@@ -45,19 +45,9 @@ Dashboard
         </div>
         <hr/>
         <div class="form-group">
-          <label class="col-sm-3 control-label">Group:</label>
+          <label class="col-sm-3 control-label">{{ form.store.label_tag }}</label>
           <div class="col-sm-5">
-            <select disabled class="select2" data-first-option="false" name="group">
-              <optgroup label="Available Groups">
-              {% for group in groups %}
-              {% if node.group_fk.pk == group.pk %}
-              <option selected="True" value="{{group.pk}}">{{ group.group_name }}</option>
-              {%else%}
-              <option value="{{group.pk}}">{{ group.group_name }}</option>
-              {%endif%}
-              {% endfor %}
-              </optgroup>
-            </select>
+            {{ form.store }}
           </div>
         </div>
         <hr/>

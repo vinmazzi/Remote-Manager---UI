@@ -18,6 +18,8 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^', include('login.urls')),
+    url(r'^user/', include('user.urls')),
+    url(r'^ntp/', include('ntp.urls')),
     url(r'^store/', include('store.urls')),
     url(r'^dhcp/', include('dhcp.urls')),
     url(r'^network/', include('network.urls')),

@@ -7,3 +7,4 @@ class NodeForm(forms.Form):
     dns2_ip = forms.CharField(max_length=20, required=False)
     dns_domain = forms.CharField(max_length=30, required=False)
     dns_search = forms.CharField(max_length=30, required=False)
+    store = forms.CharField(max_length=200, required=False)

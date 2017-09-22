@@ -96,12 +96,12 @@
         </a>
         <ul>
           <li>
-            <a href="{% url 'store:list' client_id='1' %}">
+            <a href="{% url 'store:list' client_id=client_id %}">
               <span>List Stores</span>
             </a>
           </li>
           <li>
-            <a href="{% url 'store:create' client_id='1' %}">
+            <a href="{% url 'store:create' client_id=client_id %}">
               <span>Create Store</span>
             </a>
           </li>
@@ -119,7 +119,7 @@
             </a>
           </li>
           <li>
-            <a href="{% url 'node:list' client_id='1' %}">
+            <a href="{% url 'node:list' client_id=client_id %}">
               <span>List Boxes</span>
             </a>
           </li>
@@ -137,12 +137,12 @@
             </a>
           </li>
           <li>
-            <a href="{% url 'group:list_config' client_id='1' %}">
+            <a href="{% url 'group:list_config' client_id=client_id %}">
               <span>Configure Groups</span>
             </a>
           </li>
           <li>
-            <a href="{% url 'group:create' client_id='1' %}">
+            <a href="{% url 'group:create' client_id=client_id %}">
               <span>Create Groups</span>
             </a>
           </li>

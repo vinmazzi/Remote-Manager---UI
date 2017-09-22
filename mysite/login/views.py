@@ -1,7 +1,9 @@
+from django.contrib.auth.models import User, Group
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from user.models import UserExtraInfo
 import json
 
 def auth(request):
@@ -15,13 +17,21 @@ def auth(request):
       else:
           return HttpResponse(json.dumps({'login_status': 'invalid'}), content_type="application/json")
 
-    return HttpResponseRedirect(reverse('group:index', kwargs={'client_id': '1'}))
+    user_object = User.objects.get(username=request.user.username)
+    client_id = user_object.userextrainfo_set.all()[0].client_fk.pk
+    return HttpResponseRedirect(reverse('group:index', kwargs={'client_id': client_id}))
 
 def index(request):
     if not request.user.is_authenticated:
         return render(request, 'login/login.html')
     else:
-        return HttpResponseRedirect(reverse('group:index', kwargs={'client_id': '1'}))
+        try:
+            user_object = User.objects.get(username=request.user.username)
+            client_id = user_object.userextrainfo_set.all()[0].client_fk.pk
+        except:
+            return HttpResponse(request.user.username)
+
+        return HttpResponseRedirect(reverse('group:index', kwargs={'client_id': client_id}))
 
 def do_logout(request):
     logout(request)

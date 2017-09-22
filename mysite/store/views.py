@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.contrib.auth.models import User, Group
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.forms.models import model_to_dict
@@ -52,6 +53,8 @@ def store_list(request, client_id):
 def store_edit(request, store_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login:index'))
+    user_object = User.objects.get(username=request.user.username)
+    client_id = user_object.userextrainfo_set.all()[0].client_fk.pk
     store = Store.objects.get(pk=store_id) 
     if request.method == "POST":
         form = StoreForm(request.POST)
@@ -64,7 +67,7 @@ def store_edit(request, store_id):
                   exec_string = "store.{} = \'{}\'".format(key, form.cleaned_data[key])
                   exec(exec_string)
         store.save()
-        return HttpResponseRedirect(reverse('store:edit', kwargs={'store_id': store_id}))
+        return HttpResponseRedirect(reverse('store:edit', kwargs={'store_id': store_id, 'client_id': client_id}))
     initial_values = {'name': store.name, 'code': store.code, 'country': store.country, 'state': store.state, 'city': store.city, 'address': store.address}
     form = StoreForm(initial=initial_values)
     for field in form.fields:
@@ -77,20 +80,29 @@ def store_edit(request, store_id):
         'groups': store.client_fk.group_set.all(),
         'store':store,
         'form': form,
+        'client_id': client_id,
         })
 
 def store_edit_menu(request, store_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login:index'))
+    user_object = User.objects.get(username=request.user.username)
+    client_id = user_object.userextrainfo_set.all()[0].client_fk.pk
     store = Store.objects.get(pk=store_id) 
     return render(request, 'store/store_edit_menu.html', {
         'store':store,
+        'client_id': client_id,
         })
 
 def store_boxes(request, store_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login:index'))
+    user_object = User.objects.get(username=request.user.username)
+    client_id = user_object.userextrainfo_set.all()[0].client_fk.pk
     store = Store.objects.get(pk=store_id) 
     nodes = store.node_set.all()
     return render(request, 'store/store_boxes.html', {
         'store': store,
         'nodes': nodes,
+        'client_id': client_id
         })

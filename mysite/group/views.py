@@ -9,9 +9,6 @@ from .forms import GroupForm
 
 # Create your views here.
 
-def teste(request):
-    return render(request, 'group/header.html')
-
 def group(request, client_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login:index'))
@@ -59,6 +56,7 @@ def group_list_config(request, client_id):
 
     return render(request, 'group/client_groups_list_configure.html', {
             'groups': groups,
+            'client_id': client_id,
         })
 
 def group_config(request, group_id):

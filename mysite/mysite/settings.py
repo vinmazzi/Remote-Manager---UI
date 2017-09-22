@@ -31,6 +31,8 @@ ALLOWED_HOSTS = ['127.0.0.1','192.168.1.107']
 # Application definition
 
 INSTALLED_APPS = [
+    'user.apps.UserConfig',
+    'ntp.apps.NtpConfig',
     'store.apps.StoreConfig',
     'dhcp.apps.DhcpConfig',
     'network.apps.NetworkConfig',

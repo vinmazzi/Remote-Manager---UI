@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.contrib.auth.models import User, Group
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from client.models import Client
@@ -148,6 +149,10 @@ def node_list(request, client_id):
         })
 
 def node_edit(request, node_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login:index'))
+    user_object = User.objects.get(username=request.user.username)
+    client_id = user_object.userextrainfo_set.all()[0].client_fk.pk
     node = Node.objects.get(pk=node_id)
     if request.method == 'POST':
         nodeForm = NodeForm(request.POST)
@@ -186,12 +191,6 @@ def node_edit(request, node_id):
         Utils.run_puppet(node.group_fk.group_name)
 
         if nodeForm.is_valid():
-            group_id = request.POST.get('group')
-            group = node.client_fk.group_set.get(pk=group_id)
-            node.group_fk = group
-            key_name = "{}:{}:group".format(node.client_fk.client_name,node.name)
-            key_value = group.group_name
-            Utils.redis_write(key_name, key_value)
             for key in nodeForm.cleaned_data.keys():
                 if nodeForm.cleaned_data[key] != None:
                    exec_string = "node.{} = \'{}\'".format(key, nodeForm.cleaned_data[key])
@@ -199,7 +198,7 @@ def node_edit(request, node_id):
                    if node.brand_new:
                        node.brand_new = False
             node.save()
-            return HttpResponseRedirect(reverse('node:list', kwargs={'client_id': node.client_fk.pk}))
+            return HttpResponseRedirect(reverse('node:list', kwargs={'client_id': client_id}))
         else:
             return HttpResponse(form)
     nodeForm = NodeForm()
@@ -208,19 +207,28 @@ def node_edit(request, node_id):
     for i in node.interface_set.all():
         interface_set.append(i.network_fk.network_interface)
     for field in nodeForm.fields:
-        value_text = eval("node.%s" %(field))
-        value_hash = {'value': value_text}
-        nodeForm.fields[field].widget.__dict__['attrs'].update({'class': 'form-control'})
-        nodeForm.fields[field].widget.__dict__['attrs'].update(value_hash)
-        if field == "serial_number" or field == "name":
+        if field == "store":
+            store = node.store_fk.name
+            store_code = node.store_fk.code
+            value_text = "{} - {}".format(store,store_code)
+            value_hash = {'value': value_text}
             nodeForm.fields[field].widget.__dict__['attrs'].update({'class': 'form-control'})
+            nodeForm.fields[field].widget.__dict__['attrs'].update(value_hash)
             nodeForm.fields[field].widget.__dict__['attrs'].update({'readonly': True})
+        else:
+            value_text = eval("node.%s" %(field))
+            value_hash = {'value': value_text}
+            nodeForm.fields[field].widget.__dict__['attrs'].update({'class': 'form-control'})
+            nodeForm.fields[field].widget.__dict__['attrs'].update(value_hash)
+            if field == "serial_number" or field == "name":
+                #nodeForm.fields[field].widget.__dict__['attrs'].update({'class': 'form-control'})
+                nodeForm.fields[field].widget.__dict__['attrs'].update({'readonly': True})
 
     return render(request, 'node/node_edit.html', {
             'node_id': node_id,
             'node': node,
-            'groups': node.client_fk.group_set.all(),
             'form': nodeForm,
             'interfaceForm': interfaceForm,
             'interface_set': interface_set,
+            'client_id': client_id
         })
