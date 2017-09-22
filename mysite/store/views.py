@@ -10,9 +10,10 @@ from group.models import Group
 
 # Create your views here.
 
-def store_create(request, client_id):
+def store_create(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login:index'))
+    client_id = request.session.get('client_id')
     client = Client.objects.get(pk=client_id)
     if request.method == 'POST':
         form = StoreForm(request.POST)
@@ -29,32 +30,31 @@ def store_create(request, client_id):
                     group_fk = group,
                     )
 
-            return HttpResponseRedirect(reverse('store:create', kwargs={'client_id':client_id}))
+            return HttpResponseRedirect(reverse('store:create'))
     else:
       form = StoreForm()
       for field in form.fields:
           form.fields[field].widget.__dict__['attrs'].update({'class': 'form-control'})
     return render(request, 'store/store_create.html', {
-        'client_id': client_id, 
         'form':form,
-        'groups': client.group_set.all()
+        'groups': client.group_set.all(),
         })
 
-def store_list(request, client_id):
+def store_list(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login:index'))
+    client_id = request.session.get('client_id')
     client = Client.objects.get(pk=client_id)
     stores = client.store_set.all()
     return render(request, 'store/store_list.html', {
             'stores': stores,
-            'client_id': client_id
         })
 
 def store_edit(request, store_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login:index'))
     user_object = User.objects.get(username=request.user.username)
-    client_id = user_object.userextrainfo_set.all()[0].client_fk.pk
+    client_id = request.session.get('client_id')
     store = Store.objects.get(pk=store_id) 
     if request.method == "POST":
         form = StoreForm(request.POST)
@@ -67,7 +67,7 @@ def store_edit(request, store_id):
                   exec_string = "store.{} = \'{}\'".format(key, form.cleaned_data[key])
                   exec(exec_string)
         store.save()
-        return HttpResponseRedirect(reverse('store:edit', kwargs={'store_id': store_id, 'client_id': client_id}))
+        return HttpResponseRedirect(reverse('store:edit', kwargs={'store_id': store_id}))
     initial_values = {'name': store.name, 'code': store.code, 'country': store.country, 'state': store.state, 'city': store.city, 'address': store.address}
     form = StoreForm(initial=initial_values)
     for field in form.fields:
@@ -80,7 +80,6 @@ def store_edit(request, store_id):
         'groups': store.client_fk.group_set.all(),
         'store':store,
         'form': form,
-        'client_id': client_id,
         })
 
 def store_edit_menu(request, store_id):

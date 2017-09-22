@@ -20,28 +20,41 @@
       </div>
 
       <div class="panel-body">
-        <form role="form" class="form-horizontal form-groups-bordered" method="post" action="{%url 'group:create' client_id %}">
+        <form role="form" class="form-horizontal form-groups-bordered" method="post" action="#">
           {% csrf_token %}
           <div class="form-group">
-            <label for="field-1" class="col-sm-3 control-label">{{ form.group_name_text.label_tag }}</label>
+            <label for="field-1" class="col-sm-3 control-label">{{ form.name.label_tag }}</label>
 
-            <div class="col-sm-5">
-              {{ form.group_name_text }}
+            <div class="col-sm-3">
+              {{ form.name }}
             </div>
           </div>
           <div class="form-group">
-            <label for="field-1" class="col-sm-3 control-label">{{ form.group_alias_text.label_tag }}</label>
+            <label for="field-1" class="col-sm-3 control-label">{{ form.last_name.label_tag }}</label>
 
-            <div class="col-sm-5">
-              {{ form.group_alias_text }}
+            <div class="col-sm-3">
+              {{ form.last_name }}
             </div>
           </div>
           <div class="form-group">
-            <label for="field-ta" class="col-sm-3 control-label">{{ form.group_description.label_tag }}</label>
+            <label for="field-ta" class="col-sm-3 control-label">{{ form.username.label_tag }}</label>
 
-            <div class="col-sm-5">
-              <!--<textarea class="form-control autogrow" id="field-ta" placeholder="I will grow as you type new lines."></textarea>-->
-              {{ form.group_description }}
+            <div class="col-sm-3">
+              {{ form.username }}
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="field-ta" class="col-sm-3 control-label">{{ form.email.label_tag }}</label>
+
+            <div class="col-sm-3">
+              {{ form.email }}
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="field-ta" class="col-sm-3 control-label">{{ form.password.label_tag }}</label>
+
+            <div class="col-sm-3">
+              {{ form.password }}
             </div>
           </div>
           <div class="form-group">

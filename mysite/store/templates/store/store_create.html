@@ -21,7 +21,7 @@
       </div>
 
       <div class="panel-body">
-        <form role="form" class="form-horizontal form-groups-bordered" method="post" action="{%url 'store:create' client_id %}">
+        <form role="form" class="form-horizontal form-groups-bordered" method="post" action="{%url 'store:create' %}">
           {% csrf_token %}
           <div class="form-group">
             <label for="field-1" class="col-sm-3 control-label">{{ form.name.label_tag }}</label>

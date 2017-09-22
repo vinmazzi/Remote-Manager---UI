@@ -19,19 +19,19 @@ def auth(request):
 
     user_object = User.objects.get(username=request.user.username)
     client_id = user_object.userextrainfo_set.all()[0].client_fk.pk
-    return HttpResponseRedirect(reverse('group:index', kwargs={'client_id': client_id}))
+    request.session['client_id'] = client_id
+    request.session['full_user_name'] = "{} {}".format(user_object.first_name, user_object.last_name)
+    request.session.set_expiry(0)
+    return HttpResponseRedirect(reverse('group:index'))
 
 def index(request):
     if not request.user.is_authenticated:
         return render(request, 'login/login.html')
     else:
-        try:
-            user_object = User.objects.get(username=request.user.username)
-            client_id = user_object.userextrainfo_set.all()[0].client_fk.pk
-        except:
-            return HttpResponse(request.user.username)
+        user_object = User.objects.get(username=request.user.username)
+        client_id = user_object.userextrainfo_set.all()[0].client_fk.pk
 
-        return HttpResponseRedirect(reverse('group:index', kwargs={'client_id': client_id}))
+        return HttpResponseRedirect(reverse('group:index'))
 
 def do_logout(request):
     logout(request)

@@ -138,14 +138,14 @@ def node_create(request, store_id):
         'interface_set': [],
         })
 
-def node_list(request, client_id):
+def node_list(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login:index'))
+    client_id = request.session.get('client_id')
     client = Client.objects.get(pk=client_id)
     nodes = client.node_set.all()
     return render(request, 'node/node_list.html', {
             'nodes': nodes,
-            'client_id': client_id,
         })
 
 def node_edit(request, node_id):

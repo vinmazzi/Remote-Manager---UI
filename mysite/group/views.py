@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.urls import reverse
+from django.contrib.auth.models import User, Group
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth import authenticate, login
 from client.models import Client
@@ -9,11 +10,14 @@ from .forms import GroupForm
 
 # Create your views here.
 
-def group(request, client_id):
+def group(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login:index'))
+    client_id = request.session.get('client_id')
+    username = request.session.get('full_user_name')
     return render(request, 'group/client_groups.html', {
             'client_id': client_id,
+            'username': username,
         })
 
 def group_create(request, client_id):
