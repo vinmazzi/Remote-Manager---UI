@@ -1,0 +1,88 @@
+{% extends 'group/header.html' %}
+{% block title%} Create User {% endblock %}
+{% block content %}
+      <ol class="breadcrumb bc-3">
+            <li>
+        <a href="index.html"><i class="entypo-home"></i>Home</a>
+      </li>
+          <li>
+              <a href="layout-api.html">Users</a>
+          </li>
+        <li class="active">
+              <strong>List Users</strong>
+          </li>
+          </ol>
+</br>
+<div class="row">
+  <div class="col-md-12">
+    <div class="row">
+      <div class="col-md-9 col-sm-7">
+        <h2>Users</h2>
+      </div>
+    
+      <div class="col-md-3 col-sm-5">
+    
+        <form method="get" role="form" class="search-form-full">
+    
+          <div class="form-group">
+            <input type="text" class="form-control" name="s" id="search-input" placeholder="Search..." />
+            <i class="entypo-search"></i>
+          </div>
+    
+        </form>
+    
+      </div>
+    </div>
+    {% for user in users %}
+       <div class="member-entry">
+       		
+       	<a href="extra-timeline.html" class="member-img">
+       		<img src="assets/images/member.jpg" class="img-rounded" />
+       		<i class="entypo-forward"></i>
+       	</a>
+       	
+       	<div class="member-details">
+       		<h4>
+            <a href="extra-timeline.html">{{ user.user_fk.first_name }} {{user.user_fk.last_name}}</a>
+       		</h4>
+       		
+       		<!-- Details with Icons -->		
+          <div class="row info-list">
+       			
+       			<div class="col-sm-4">
+       				<i class="entypo-user"></i>
+              <a href="#">{{user.user_fk.username}}</a>
+       			</div>
+       			
+       			<div class="col-sm-4">
+       				<i class="entypo-vcard"></i>
+              <a href="#">Role: Users</a>
+       			</div>
+
+       			<div class="col-sm-4">
+       				<i class="entypo-mail"></i>
+              <a href="#">{{user.user_fk.email}}</a>
+       			</div>
+
+       			<div class="clear"></div>
+
+       			<div class="col-sm-4">
+       				<i class="entypo-clock"></i>
+              <a href="#">Last Login: {{user.user_fk.last_login|date:"d/m/Y H:i:s"}}</a>
+       			</div>
+       			
+
+       			<div class="col-sm-4">
+       				<i class="entypo-clock"></i>
+              <a href="#">Status: {% if user.user_fk.is_active %} Active {% else %} Inactive {% endif %}</a>
+       			</div>
+
+       		</div>
+       	</div>
+       	
+       </div>
+       {% endfor %}
+      </aqui>
+    </div>
+</div>
+{% endblock %}

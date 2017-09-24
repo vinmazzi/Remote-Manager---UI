@@ -1,9 +1,11 @@
 from django.contrib.auth.models import User, Group
+from user.models import UserExtraInfo
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from user.models import UserExtraInfo
+from client.models import Client
 from .forms import UserForm
 
 # Create your views here.
@@ -30,5 +32,21 @@ def user_create(request):
         form.fields[field].widget.__dict__['attrs'].update({'class': 'form-control'})
     return render(request, 'user/user_create.html', {
             'client_id': client_id,
+            'form': form
+        })
+
+def user_list(request):
+    client_id = request.session.get('client_id')
+    client = Client.objects.get(pk=client_id)
+    users = UserExtraInfo.objects.filter(client_fk=client)
+    return render(request,'user/user_list.html', {
+            'users': users,
+        })
+
+def user_edit(request, user_id):
+    user = User.objects.get(pk=user_id)
+    initial_values = {'username': user.username, 'email': user.email}
+    form = UserForm()
+    return render(request,'user/user_edit.html', {
             'form': form
         })

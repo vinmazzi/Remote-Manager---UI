@@ -108,17 +108,10 @@
         </ul>
 			</li>
 			<li>
-        <a href="#">
+          <a href="{% url 'node:list' %}">
 				  <i class="entypo-box"></i>
           <span>Boxes</span>
         </a>
-        <ul>
-          <li>
-            <a href="{% url 'node:list' %}">
-              <span>List Boxes</span>
-            </a>
-          </li>
-        </ul>
       </li>
 			<li>
         <a href="#">
@@ -132,12 +125,12 @@
             </a>
           </li>
           <li>
-            <a href="{% url 'group:list_config' client_id='1'%}">
+            <a href="{% url 'group:list_config' %}">
               <span>Configure Groups</span>
             </a>
           </li>
           <li>
-            <a href="{% url 'group:create' client_id='1'%}">
+            <a href="{% url 'group:create' %}">
               <span>Create Groups</span>
             </a>
           </li>
@@ -155,7 +148,7 @@
             </a>
           </li>
           <li>
-            <a href="#">
+            <a href="{% url 'user:list' %}">
               <span>List Users</span>
             </a>
           </li>

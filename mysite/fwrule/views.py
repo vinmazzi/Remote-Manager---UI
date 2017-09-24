@@ -58,10 +58,10 @@ def redis_write(key_name, value):
    except Exception as err:
        return HttpResponse(err)
 
-def fwrules(request, client_id, group_id):
+def fwrules(request, group_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login:index'))
-
+    client_id = request.session.get('client_id')
     client = Client.objects.get(pk=client_id)
     group = client.group_set.get(pk=group_id)
 
@@ -86,7 +86,7 @@ def fwrules(request, client_id, group_id):
            redis_write(key_name, json_fwrule)
            run_puppet(group.group_name)
 
-           return HttpResponseRedirect(reverse('fwrule:fwrules', kwargs={'client_id':client_id, 'group_id':group_id}))
+           return HttpResponseRedirect(reverse('fwrule:fwrules', kwargs={'group_id':group_id}))
     else:
         form = FwRuleForm()
         for field in form.fields:
@@ -107,7 +107,6 @@ def fwrules(request, client_id, group_id):
                'fwrules': fwrules,
                'group': group,
                'group_id': group_id,
-               'client_id': client_id,
             })
 
 def fwrules_edit(request, fwrule_id):
@@ -119,19 +118,20 @@ def fwrules_edit(request, fwrule_id):
     client_name = fwrule.group_fk.client_fk.client_name
 
     if request.method == 'POST':
-        form = FwRuleForm(request.POST)
-        if form.is_valid():
-            for key in form.cleaned_data.keys():
-                if form.cleaned_data[key] != None:
-                   exec_string = "fwrule.{} = \'{}\'".format(key, form.cleaned_data[key])
-                   exec(exec_string)
-            fwrule.save()
-            key_name = "{}:{}:fwrules".format(client_name, group_name)
-            json_fwrule = fwrules_redis_format(fwrule.group_fk.firewall_rule_set.all())
-            redis_write(key_name, json_fwrule)
-            run_puppet(group_name)
+        if request.user.has_perm('fwrule.change_firewall_rule'):
+           form = FwRuleForm(request.POST)
+           if form.is_valid():
+               for key in form.cleaned_data.keys():
+                   if form.cleaned_data[key] != None:
+                      exec_string = "fwrule.{} = \'{}\'".format(key, form.cleaned_data[key])
+                      exec(exec_string)
+               fwrule.save()
+               key_name = "{}:{}:fwrules".format(client_name, group_name)
+               json_fwrule = fwrules_redis_format(fwrule.group_fk.firewall_rule_set.all())
+               redis_write(key_name, json_fwrule)
+               run_puppet(group_name)
 
-            return HttpResponseRedirect(reverse('fwrule:fwrules', kwargs={'client_id':fwrule.group_fk.client_fk.pk, 'group_id': fwrule.group_fk.pk}))
+               return HttpResponseRedirect(reverse('fwrule:fwrules', kwargs={'group_id': fwrule.group_fk.pk}))
     else:
        form = FwRuleForm()
        for field in form.fields:
@@ -151,15 +151,16 @@ def fwrules_delete(request):
         return HttpResponseRedirect(reverse('login:index'))
 
     fwrule = Firewall_rule.objects.get(pk=request.POST.get('firewall_id'))
-    group_name = fwrule.group_fk.group_name
-    client_name = fwrule.group_fk.client_fk.client_name
-    fwrule.delete()
+    if request.user.has_perm('fwrule.delete_firewall_rule'):
+       group_name = fwrule.group_fk.group_name
+       client_name = fwrule.group_fk.client_fk.client_name
+       fwrule.delete()
 
-    key_name = "{}:{}:fwrules".format(client_name, group_name)
-    json_fwrule = fwrules_redis_format(fwrule.group_fk.firewall_rule_set.all())
-    redis_write(key_name, json_fwrule)
-    run_puppet(group_name)
+       key_name = "{}:{}:fwrules".format(client_name, group_name)
+       json_fwrule = fwrules_redis_format(fwrule.group_fk.firewall_rule_set.all())
+       redis_write(key_name, json_fwrule)
+       run_puppet(group_name)
 
-    return HttpResponseRedirect(reverse('fwrule:fwrules', kwargs={'client_id':fwrule.group_fk.client_fk.pk, 'group_id': fwrule.group_fk.pk}))
+    return HttpResponseRedirect(reverse('fwrule:fwrules', kwargs={'group_id': fwrule.group_fk.pk}))
     
 

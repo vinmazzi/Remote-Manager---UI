@@ -12,7 +12,7 @@ Dashboard
      <a href="#">Groups</a>
    </li>
    <li>
-     <a href="{% url 'group:list_config' group.client_fk.id %}">Configure Groups</a>
+     <a href="{% url 'group:list_config' %}">Configure Groups</a>
    </li>
    <li>
      <a href="#">Firewall Rules</a>
@@ -32,12 +32,14 @@ Dashboard
              <span class="hidden-xs">Rule List</span>
            </a>
          </li>
+         {% if "fwrule.create_firewall_rule" in request.session.user_perms %}
          <li>
            <a href="#profile" data-toggle="tab">
              <span class="visible-xs"><i class="entypo-user"></i></span>
              <span class="hidden-xs">Add Rule</span>
            </a>
          </li>
+         {% endif %}
        </ul>
        
        <div class="tab-content">
@@ -116,7 +118,7 @@ Dashboard
                   <td>{{ rule.action }}</td>
 
                   <td>
-                    <a href="#" onclick="show_modal({{ rule.pk }}, {{client_id}}, {{group_id}});" class="btn btn-default btn-sm btn-icon icon-left"> <i class="entypo-pencil"></i> Edit </a>
+                    <a href="#" onclick="show_modal({{ rule.pk }}, {{group_id}});" class="btn btn-default btn-sm btn-icon icon-left"> <i class="entypo-pencil"></i> Edit </a>
                     <a href="#" name="form-{{rule.pk}}" class="btn btn-danger btn-sm btn-icon icon-left" onclick="send_or_edit('delete', this.name);">
 
                       <i class="entypo-cancel"></i>
@@ -132,8 +134,9 @@ Dashboard
             </table>
          </div>
 <script type="text/javascript">
-   function show_modal(rule_id, client_id, group_id){
+   function show_modal(rule_id, group_id){
 
+     {% if "fwrule.change_firewall_rule" in request.session.user_perms %}
      jQuery('#modal-7').modal('show', {backdrop: 'static'});
      
      $.ajax({
@@ -143,19 +146,58 @@ Dashboard
          jQuery('#modal-7 .modal-body').html(response);
        }
      });
+     {% else %}
+
+      var opts = {
+        "closeButton": true,
+        "debug": false,
+        "positionClass": "toast-top-full-width",
+        "onclick": null,
+        "showDuration": "300",
+        "hideDuration": "1000",
+        "timeOut": "5000",
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+      };
+      
+      toastr.error("You don't have permission to edit Firewall Rules!", "Please Contact the Administrator.", opts);
+     {% endif %}
    }
 </script>
          <script type="text/javascript">
 function send_or_edit (my_action, my_form) {
 
   if (my_action == "delete") {
+    {% if "fwrule.delete_firewall_rule" in request.session.user_perms %}
     document.getElementById(my_form).action = "{% url 'fwrule:fwrule_delete' %}";
     document.getElementById(my_form).submit();
+    {% else %}
+      var opts = {
+        "closeButton": true,
+        "debug": false,
+        "positionClass": "toast-top-full-width",
+        "onclick": null,
+        "showDuration": "300",
+        "hideDuration": "1000",
+        "timeOut": "5000",
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+      };
+      
+      toastr.error("You don't have permission to delete Firewall Rules!", "Please Contact the Administrator.", opts);
+    {% endif %}
   }
 
 }
          </script>
-         <div class="tab-pane" id="profile">
+ {% if "fwrule.create_firewall_rule" in request.session.user_perms %}
+ <div class="tab-pane" id="profile">
     <div class="panel panel-primary" data-collapsed="0">
       <div class="panel-heading">
         <div class="panel-title">
@@ -163,7 +205,7 @@ function send_or_edit (my_action, my_form) {
         </div>
       </div>
         <div class="panel-body">
-          <form role="form" class="form-horizontal form-groups-bordered" method="post" action="{%url 'fwrule:fwrules' client_id group_id %}">
+          <form role="form" class="form-horizontal form-groups-bordered" method="post" action="{%url 'fwrule:fwrules' group_id %}">
             {% csrf_token %}
             <div class="form-group">
               <label for="field-1" class="col-sm-3 control-label">{{ form.rule_name_text.label_tag }}</label>
@@ -236,6 +278,7 @@ function send_or_edit (my_action, my_form) {
           </form>
       </div>
     </div>
+    {% endif %}
  </div>
 </div>
 
@@ -264,6 +307,7 @@ function send_or_edit (my_action, my_form) {
   <script src="{% static 'assets/js/neon-chat.js'%}"></script>
   <script src="{% static 'assets/js/neon-custom.js'%}"></script>
   <script src="{% static 'assets/js/neon-demo.js'%}"></script>
+  <script src="{% static 'assets/js/toastr.js' %}"></script>
 
 {% endblock %}
 

@@ -21,6 +21,7 @@ def auth(request):
     client_id = user_object.userextrainfo_set.all()[0].client_fk.pk
     request.session['client_id'] = client_id
     request.session['full_user_name'] = "{} {}".format(user_object.first_name, user_object.last_name)
+    request.session['user_perms'] = list(user_object.get_all_permissions())
     request.session.set_expiry(0)
     return HttpResponseRedirect(reverse('group:index'))
 

@@ -11,7 +11,7 @@
            <a href="#">Groups</a>
          </li>
          <li>
-           <a href="{% url 'group:list_config' group.client_fk.id %}">Configure Groups</a>
+           <a href="{% url 'group:list_config'  %}">Configure Groups</a>
          </li>
          <li class="active">
            <strong>Configure {{ group.group_alias }}</strong>
@@ -21,8 +21,9 @@
 <h2>Configure {{ group.group_alias }}</h2>
 <br/ >
 <div class="row">
+{% if "fwrule.view_firewall_rule" in request.session.user_perms %}
 	<div class="col-sm-3">
-    <a href="{% url 'fwrule:fwrules' client_id=group.client_fk.id group_id=group.id %}">
+    <a href="{% url 'fwrule:fwrules' group_id=group.id %}">
       <div class="tile-title tile-blue">
         <div class="icon">
           <i class="entypo entypo-lock"></i>
@@ -34,6 +35,7 @@
       </div>
     </a>
 	</div>
+{% endif %}
 	<div class="col-sm-3">
     <a href="{% url 'network:list' group_id=group.id %}">
       <div class="tile-title tile-blue">

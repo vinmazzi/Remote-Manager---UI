@@ -16,13 +16,13 @@ def group(request):
     client_id = request.session.get('client_id')
     username = request.session.get('full_user_name')
     return render(request, 'group/client_groups.html', {
-            'client_id': client_id,
             'username': username,
         })
 
-def group_create(request, client_id):
+def group_create(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login:index'))
+    client_id = request.session.get('client_id')
     client = Client.objects.get(pk=client_id)
 
     if request.method == 'POST':
@@ -34,7 +34,7 @@ def group_create(request, client_id):
                     group_description = form.cleaned_data['group_description'],
                     )
 
-            return HttpResponseRedirect(reverse('group:index', kwargs={'client_id':client_id}))
+            return HttpResponseRedirect(reverse('group:index'))
     else:
         form = GroupForm()
         for field in form.fields:
@@ -43,13 +43,13 @@ def group_create(request, client_id):
                 form.fields[field].widget.__dict__['attrs'].update({'class': 'form-control autogrow'})
                 form.fields[field].widget.__dict__['attrs'].update({'style': 'height: 48px'})
     return render(request, 'group/client_groups_create.html', {
-                'client_id': client_id,
                 'form': form,
             })
 
-def group_list_config(request, client_id):
+def group_list_config(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login:index'))
+    client_id = request.session.get('client_id')
     client = Client.objects.get(pk=client_id)
     try:
         groups = client.group_set.all()
@@ -60,18 +60,12 @@ def group_list_config(request, client_id):
 
     return render(request, 'group/client_groups_list_configure.html', {
             'groups': groups,
-            'client_id': client_id,
         })
 
 def group_config(request, group_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login:index'))
-    try:
-        group = Group.objects.get(pk=group_id)
-    except (KeyError, Group.DoesNotExist):
-        return render(request, 'group/client_groups_list_configure.html', {
-                'error_massage': "No Clients yet!",
-            })
+    group = Group.objects.get(pk=group_id)
 
     return render(request, 'group/client_groups_configure.html', {
             'group': group,
