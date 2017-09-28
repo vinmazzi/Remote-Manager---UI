@@ -7184,6 +7184,29 @@ textareatable .replace-inputs input {
 .tile-title.tile-green .title p {
   color: rgba(255, 255, 255, 0.85);
 }
+
+
+.tile-title.tile-green2 {
+  background: #E7FF6E;
+}
+.tile-title.tile-green2:hover {
+  background-color: #B5D12A;
+}
+.tile-title.tile-green2 .icon i,
+.tile-title.tile-green2 h3,
+.tile-title.tile-green2 p {
+  color: #ffffff;
+}
+.tile-title.tile-green2 .icon i {
+  color: #ffffff;
+}
+.tile-title.tile-green2 .title {
+  background: rgba(0, 0, 0, 0.1);
+}
+.tile-title.tile-green2 .title p {
+  color: rgba(255, 255, 255, 0.85);
+}
+
 .tile-title.tile-blue {
   background: #0073b7;
 }

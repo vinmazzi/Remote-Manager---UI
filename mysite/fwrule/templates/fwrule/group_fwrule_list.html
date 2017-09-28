@@ -23,6 +23,46 @@ Dashboard
 </ol>
 <h2>Create Firewall Rule</h2>
 <br/ >
+<script type="text/javascript">
+   $(document).ready(function() {
+
+   $("#source").change(function(){
+     if($("#source").val() == "custom") {
+      $("#source-custom").show();
+     } else {
+      $("#source-custom").hide();
+     }
+   });
+   $("#destination").change(function(){
+     if($("#destination").val() == "custom") {
+      $("#destination-custom").show();
+     } else {
+      $("#destination-custom").hide();
+     }
+   });
+    $("#table").change(function(){
+      $("#chain").find('option').remove();
+      $("#action").find('option').remove();
+      if($("#table").val() == "nat") {
+        $("#chain").append($("<option></option>").attr("value","POSTROUTING").text("POSTROUTING"));
+        $("#chain").append($("<option></option>").attr("value","PREROUTING").text("PREROUTING"));
+        $("#chain").append($("<option></option>").attr("value","INPUT").text("INPUT"));
+        $("#chain").append($("<option></option>").attr("value","OUTPUT").text("OUTPUT"));
+        $("#action").append($("<option></option>").attr("value","accept").text("Allow"));
+        $("#action").append($("<option></option>").attr("value","deny").text("Deny"));
+        $("#action").append($("<option></option>").attr("value","drop").text("Drop"));
+        $("#action").append($("<option></option>").attr("value","masquerade").text("Masquerade"));
+      } else if($("#table").val() == "filter") {
+        $("#chain").append($("<option></option>").attr("value","INPUT").text("INPUT"));
+        $("#chain").append($("<option></option>").attr("value","OUTPUT").text("OUTPUT"));
+        $("#chain").append($("<option></option>").attr("value","FORWARD").text("FORWARD"));
+        $("#action").append($("<option></option>").attr("value","accept").text("Allow"));
+        $("#action").append($("<option></option>").attr("value","deny").text("Deny"));
+        $("#action").append($("<option></option>").attr("value","drop").text("Drop"));
+      }
+    });
+  });
+</script>
 <div class="row">
   <div class="col-md-12">
    <ul class="nav nav-tabs bordered"><!-- available classes "bordered", "right-aligned" -->
@@ -32,7 +72,7 @@ Dashboard
              <span class="hidden-xs">Rule List</span>
            </a>
          </li>
-         {% if "fwrule.create_firewall_rule" in request.session.user_perms %}
+         {% if "fwrule.add_firewall_rule" in request.session.user_perms %}
          <li>
            <a href="#profile" data-toggle="tab">
              <span class="visible-xs"><i class="entypo-user"></i></span>
@@ -48,11 +88,11 @@ Dashboard
              <table class="table table-bordered datatable" id="table-3">
               <thead>
                 <tr>
-                  <th>
+                <!--  <th>
                     <div class="checkbox checkbox-replace">
                       <input type="checkbox" id="chk-1">
                     </div>
-                  </th>
+                </th>-->
                   <th>Rule Name</th>
                   <th>Source Ip</th>
                   <th>Destination Ip</th>
@@ -71,11 +111,11 @@ Dashboard
                {% csrf_token %}
                 <tr>
                   <input type="hidden" name="firewall_id" id="firewall_id_{{rule.pk}}" value="{{rule.pk}}">
-                  <td>
+                  <!--<td>
                     <div class="checkbox checkbox-replace">
                       <input type="checkbox" name="firewall_id" value="">
                     </div>
-                  </td>
+                  </td>-->
                   <td>{{rule.rule_name_text}}</td>
                   {% if not rule.source %}
                   <td>0.0.0.0</td>
@@ -196,7 +236,7 @@ function send_or_edit (my_action, my_form) {
 
 }
          </script>
- {% if "fwrule.create_firewall_rule" in request.session.user_perms %}
+ {% if "fwrule.add_firewall_rule" in request.session.user_perms %}
  <div class="tab-pane" id="profile">
     <div class="panel panel-primary" data-collapsed="0">
       <div class="panel-heading">
@@ -210,64 +250,124 @@ function send_or_edit (my_action, my_form) {
             <div class="form-group">
               <label for="field-1" class="col-sm-3 control-label">{{ form.rule_name_text.label_tag }}</label>
 
-              <div class="col-sm-5">
+              <div class="col-sm-3">
                 {{ form.rule_name_text }}
               </div>
             </div>
             <div class="form-group">
-              <label for="field-1" class="col-sm-3 control-label">{{ form.source.label_tag }}</label>
+              <label for="field-1" class="col-sm-3 control-label" style="vertical-align: middle;">{{ form.source.label_tag }}</label>
 
-              <div class="col-sm-5">
-                {{ form.source }}
+              <div class="col-sm-2">
+                <select name="source" required="true" id="source" class="select2" data-allow-clear="true" data-placeholder="Source">
+                  <option></option>
+                    <option value="all">ALL</option>
+                  <optgroup label="Available Networks: ">
+                    {%for network in networks %}
+                    <option value="{{network.network_name}}">{{network.network_name}} Network</option>
+                    {% endfor %}
+                  </optgroup>
+                  <optgroup label="Available Gateways: ">
+                    {%for network in networks %}
+                    <option value="{{network.network_name}}">{{network.network_name}} Gateway</option>
+                    {% endfor %}
+                  </optgroup>
+                  <optgroup label="Custom Network: ">
+                    <option value="custom">Inform Ip</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div class="col-sm-2">
+                <input type="text" class="form-control" name="source-custom" id="source-custom" style="height: 40px; display: none;" placeholder="Custom Address"/>
               </div>
             </div>
             <div class="form-group">
-              <label for="field-1" class="col-sm-3 control-label">{{ form.destination.label_tag }}</label>
-
-              <div class="col-sm-5">
-                {{ form.destination }}
+              <label for="field-1" class="col-sm-3 control-label" style="vertical-align: middle;">{{ form.destination.label_tag }}</label>
+              <div class="col-sm-2">
+                <select name="destination" required="true" id="destination" class="select2" data-allow-clear="true" data-placeholder="Destination">
+                  <option></option>
+                    <option value="all">ALL</option>
+                  <optgroup label="Available Networks: ">
+                    {%for network in networks %}
+                    <option value="{{network.network_name}}">{{network.network_name}} Network</option>
+                    {% endfor %}
+                  </optgroup>
+                  <optgroup label="Available Gateways: ">
+                    {%for network in networks %}
+                    <option value="{{network.network_name}}">{{network.network_name}} Gateway</option>
+                    {% endfor %}
+                  </optgroup>
+                  <optgroup label="Custom Network: ">
+                    <option value="custom">Inform Ip</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div class="col-sm-2">
+                <input type="text" class="form-control" name="destination-custom" id="destination-custom" style="height: 40px; display: none;" placeholder="Custom Address"/>
               </div>
             </div>
             <div class="form-group">
               <label for="field-1" class="col-sm-3 control-label">{{ form.proto.label_tag }}</label>
 
-              <div class="col-sm-5">
-                {{ form.proto }}
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="field-1" class="col-sm-3 control-label">{{ form.chain.label_tag }}</label>
-
-              <div class="col-sm-5">
-                {{ form.chain }}
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="field-1" class="col-sm-3 control-label">{{ form.action.label_tag }}</label>
-
-              <div class="col-sm-5">
-                {{ form.action }}
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="field-1" class="col-sm-3 control-label">{{ form.table.label_tag }}</label>
-
-              <div class="col-sm-5">
-                {{ form.table }}
+              <div class="col-sm-2">
+                <!--{{ form.proto }}-->
+                <select name="protocol"  required="true" class="select2" data-allow-clear="true" data-placeholder="Protocol">
+                  <option></option>
+                  <optgroup label="Available Protocols">
+                  <option value="tcp">TCP</option>
+                  <option value="udp">UDP</option>
+                  <option value="icmp">ICMP</option>
+                  <option value="all">ALL</option>
+                  </optgroup>
+                </select>
               </div>
             </div>
             <div class="form-group">
               <label for="field-1" class="col-sm-3 control-label">{{ form.sport.label_tag }}</label>
 
-              <div class="col-sm-5">
+              <div class="col-sm-1">
                 {{ form.sport }}
               </div>
             </div>
             <div class="form-group">
               <label for="field-1" class="col-sm-3 control-label">{{ form.dport.label_tag }}</label>
 
-              <div class="col-sm-5">
+              <div class="col-sm-1">
                 {{ form.dport }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="field-1" class="col-sm-3 control-label">{{ form.table.label_tag }}</label>
+
+              <div class="col-sm-2">
+                <select name="table"  required="true" id="table" class="select2" data-allow-clear="true" data-placeholder="Table">
+                  <option></option>
+                  <optgroup label="Available Tables">
+                  <option value="filter">FILTER</option>
+                  <option value="nat">NAT</option>
+                  </optgroup>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="field-1" class="col-sm-3 control-label">{{ form.chain.label_tag }}</label>
+
+              <div class="col-sm-2">
+                <select name="chain"  required="true" id="chain" class="select2" data-allow-clear="true" data-placeholder="Protocol">
+                  <option></option>
+                  <optgroup label="Available Chains">
+                  </optgroup>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="field-1" class="col-sm-3 control-label">{{ form.action.label_tag }}</label>
+
+              <div class="col-sm-2">
+                <select name="action"  required="true" id="action" class="select2" data-allow-clear="true" data-placeholder="Actions">
+                  <option></option>
+                  <optgroup label="Available Actions">
+                  </optgroup>
+                </select>
               </div>
             </div>
             <div class="form-group">

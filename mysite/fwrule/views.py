@@ -9,6 +9,7 @@ from django import forms
 from django.forms.models import model_to_dict
 from .models import Firewall_rule
 from .forms import FwRuleForm
+from network.models import Network
 from client.models import Client
 from client.forms import ClientForm
 from group.models import Group
@@ -28,11 +29,23 @@ def run_puppet(group_name):
 def fwrules_redis_format(fwrules):
    fwrules_hash = {}
    for f in fwrules:
+       group = f.group_fk
+       networks = group.network_set.all()
        dict_f = model_to_dict(f)
        pop_keys = ['rule_name_text', 'group_fk', 'id']
 
+       if Network.objects.filter(network_name=f.source):
+           network = Network.objects.filter(network_name=f.source)[0]
+           dict_f['source'] = "%%{facts.networking.interfaces.%s.network}" %(network.network_interface)
+
+       if Network.objects.filter(network_name=f.destination):
+           network = Network.objects.filter(network_name=f.destination)[0]
+           dict_f['destination'] = "%%{facts.networking.interfaces.%s.network}" %(network.network_interface)
+
        for key,value in dict_f.items():
            if not value: pop_keys.append(key)
+           if key == "source" and value == "all": pop_keys.append(key)
+           if key == "destination" and value == "all": pop_keys.append(key)
 
        if not dict_f['action'] in {'accept', 'drop', 'reject'}:
            tmp_value = dict_f['action'].upper()
@@ -64,29 +77,51 @@ def fwrules(request, group_id):
     client_id = request.session.get('client_id')
     client = Client.objects.get(pk=client_id)
     group = client.group_set.get(pk=group_id)
+    networks = group.network_set.all()
 
     if request.method == 'POST':
         form = FwRuleForm(request.POST)
+        source_ip = request.POST.get('source')
+        destination_ip = request.POST.get('destination')
+        protocol = request.POST.get('protocol')
+        table = request.POST.get('table')
+        chain = request.POST.get('chain')
+        custom_source = request.POST.get('source-custom')
+        custom_destination = request.POST.get('destination-custom')
+        action = request.POST.get('action')
+
         if form.is_valid():
-          
-           new_fwrule = group.firewall_rule_set.create(  
-                   rule_name_text   = form.cleaned_data['rule_name_text'],
-                   source           = form.cleaned_data['source'],
-                   destination      = form.cleaned_data['destination'],
-                   proto            = form.cleaned_data['proto'],
-                   action           = form.cleaned_data['action'],
-                   chain            = form.cleaned_data['chain'].upper(),
-                   table            = form.cleaned_data['table'],
-                   sport            = form.cleaned_data['sport'], 
-                   dport            = form.cleaned_data['dport'])
+            if custom_source and custom_destination:
+                source = custom_source
+                destination = custom_destination
+            elif custom_source:
+                source = custom_source
+                destination = destination_ip
+            elif custom_destination:
+                source = source_ip
+                destination = custom_destination
+            else:
+                source = source_ip
+                destination = destination_ip
 
-           fwrules = group.firewall_rule_set.all()
-           key_name = "{}:{}:fwrules".format(client.client_name, group.group_name)
-           json_fwrule = fwrules_redis_format(fwrules)
-           redis_write(key_name, json_fwrule)
-           run_puppet(group.group_name)
+            new_fwrule = group.firewall_rule_set.create(  
+                    rule_name_text   = form.cleaned_data['rule_name_text'],
+                    source           = source,
+                    destination      = destination,
+                    proto            = protocol,
+                    action           = action,
+                    chain            = chain.upper(),
+                    table            = table,
+                    sport            = form.cleaned_data['sport'], 
+                    dport            = form.cleaned_data['dport'])
 
-           return HttpResponseRedirect(reverse('fwrule:fwrules', kwargs={'group_id':group_id}))
+            fwrules  = group.firewall_rule_set.all()
+            key_name = "{}:{}:fwrules".format(client.client_name, group.group_name)
+            json_fwrule = fwrules_redis_format(fwrules)
+            redis_write(key_name, json_fwrule)
+            run_puppet(group.group_name)
+
+            return HttpResponseRedirect(reverse('fwrule:fwrules', kwargs={'group_id':group_id}))
     else:
         form = FwRuleForm()
         for field in form.fields:
@@ -107,6 +142,7 @@ def fwrules(request, group_id):
                'fwrules': fwrules,
                'group': group,
                'group_id': group_id,
+               'networks': networks,
             })
 
 def fwrules_edit(request, fwrule_id):
