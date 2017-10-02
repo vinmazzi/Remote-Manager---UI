@@ -49,7 +49,7 @@ Dashboard
         $("#chain").append($("<option></option>").attr("value","INPUT").text("INPUT"));
         $("#chain").append($("<option></option>").attr("value","OUTPUT").text("OUTPUT"));
         $("#action").append($("<option></option>").attr("value","accept").text("Allow"));
-        $("#action").append($("<option></option>").attr("value","deny").text("Deny"));
+        $("#action").append($("<option></option>").attr("value","reject").text("Deny"));
         $("#action").append($("<option></option>").attr("value","drop").text("Drop"));
         $("#action").append($("<option></option>").attr("value","masquerade").text("Masquerade"));
       } else if($("#table").val() == "filter") {
@@ -57,7 +57,7 @@ Dashboard
         $("#chain").append($("<option></option>").attr("value","OUTPUT").text("OUTPUT"));
         $("#chain").append($("<option></option>").attr("value","FORWARD").text("FORWARD"));
         $("#action").append($("<option></option>").attr("value","accept").text("Allow"));
-        $("#action").append($("<option></option>").attr("value","deny").text("Deny"));
+        $("#action").append($("<option></option>").attr("value","reject").text("Deny"));
         $("#action").append($("<option></option>").attr("value","drop").text("Drop"));
       }
     });
@@ -263,12 +263,12 @@ function send_or_edit (my_action, my_form) {
                     <option value="all">ALL</option>
                   <optgroup label="Available Networks: ">
                     {%for network in networks %}
-                    <option value="{{network.network_name}}">{{network.network_name}} Network</option>
+                    <option value="{{network.network_name}}-network">{{network.network_name}} Network</option>
                     {% endfor %}
                   </optgroup>
                   <optgroup label="Available Gateways: ">
                     {%for network in networks %}
-                    <option value="{{network.network_name}}">{{network.network_name}} Gateway</option>
+                    <option value="{{network.network_name}}-gateway">{{network.network_name}} Gateway</option>
                     {% endfor %}
                   </optgroup>
                   <optgroup label="Custom Network: ">
@@ -288,12 +288,12 @@ function send_or_edit (my_action, my_form) {
                     <option value="all">ALL</option>
                   <optgroup label="Available Networks: ">
                     {%for network in networks %}
-                    <option value="{{network.network_name}}">{{network.network_name}} Network</option>
+                    <option value="{{network.network_name}}-network">{{network.network_name}} Network</option>
                     {% endfor %}
                   </optgroup>
                   <optgroup label="Available Gateways: ">
                     {%for network in networks %}
-                    <option value="{{network.network_name}}">{{network.network_name}} Gateway</option>
+                    <option value="{{network.network_name}}-gateway">{{network.network_name}} Gateway</option>
                     {% endfor %}
                   </optgroup>
                   <optgroup label="Custom Network: ">

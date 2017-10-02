@@ -20,7 +20,7 @@ def run_puppet(group_name):
    ssh = paramiko.SSHClient()
    try:
        ssh.load_system_host_keys()
-       ssh.connect('192.168.122.132', username="mcollective", password="mcollective")
+       ssh.connect('192.168.1.201', username="mcollective", password="mcollective")
        stdin, stdout,stder = ssh.exec_command("/opt/puppetlabs/bin/mco puppet runonce -F group_name={}".format(group_name))
        ssh.close
    except Exception as err:
@@ -34,13 +34,19 @@ def fwrules_redis_format(fwrules):
        dict_f = model_to_dict(f)
        pop_keys = ['rule_name_text', 'group_fk', 'id']
 
-       if Network.objects.filter(network_name=f.source):
-           network = Network.objects.filter(network_name=f.source)[0]
-           dict_f['source'] = "%%{facts.networking.interfaces.%s.network}" %(network.network_interface)
+       if Network.objects.filter(network_name=f.source.split("-")[0]):
+           network = Network.objects.filter(network_name=f.source.split("-")[0])[0]
+           if "network" in f.source:
+               dict_f['source'] = "%%{facts.networking.interfaces.%s.network}" %(network.network_interface)
+           elif "gateway" in f.source:
+               dict_f['source'] = "%%{facts.networking.interfaces.%s.ip}" %(network.network_interface)
 
-       if Network.objects.filter(network_name=f.destination):
-           network = Network.objects.filter(network_name=f.destination)[0]
-           dict_f['destination'] = "%%{facts.networking.interfaces.%s.network}" %(network.network_interface)
+       if Network.objects.filter(network_name=f.destination.split("-")[0]):
+           network = Network.objects.filter(network_name=f.destination.split("-")[0])[0]
+           if "network" in f.source:
+               dict_f['destination'] = "%%{facts.networking.interfaces.%s.network}" %(network.network_interface)
+           elif "gateway" in f.source:
+               dict_f['destination'] = "%%{facts.networking.interfaces.%s.ip}" %(network.network_interface)
 
        for key,value in dict_f.items():
            if not value: pop_keys.append(key)
@@ -63,7 +69,7 @@ def fwrules_redis_format(fwrules):
    return json.dumps(fwrules_hash)
 
 def redis_write(key_name, value):
-   host_ip = "192.168.122.132"
+   host_ip = "192.168.1.201"
    tcp_port = 6379
    try:
        rc = redis.StrictRedis(host=host_ip, port=tcp_port, db=0)
@@ -176,9 +182,10 @@ def fwrules_edit(request, fwrule_id):
            form.fields[field].widget.__dict__['attrs'].update({'class': 'form-control'})
            form.fields[field].widget.__dict__['attrs'].update(value_hash) 
 
-
        return render(request, 'fwrule/fwrules_edit.html', {
            'fwrule_id': fwrule_id,
+           'fwrule': fwrule,
+           'networks': fwrule.group_fk.network_set.all(),
            'form': form,
            })
 

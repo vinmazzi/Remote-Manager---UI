@@ -34,7 +34,7 @@ def interface_redis_format(interfaces):
 
 def puppetdb_query(query):
     url_values = urllib.parse.urlencode({'query': query})
-    url = 'http://192.168.122.132:8080/pdb/query/v4/facts'
+    url = 'http://192.168.1.201:8080/pdb/query/v4/facts'
     full_url = url + "?" + url_values
     result = json.loads(str(urllib.request.urlopen(full_url).read(),'utf-8'))
     return result
@@ -113,7 +113,8 @@ def node_create(request, store_id):
             interfaces_key = "{}:{}:network_interfaces".format(node.client_fk.client_name, node.name)
             Utils.redis_write(interfaces_key, interfaces_json)
 
-            razor_tag_data = json.dumps({'name':node.name, 'rule': ["=",["fact","serialnumber"],node.serial_number]})
+            #razor_tag_data = json.dumps({'name':node.name, 'rule': ["=",["fact","serialnumber"],node.serial_number]})
+            razor_tag_data = json.dumps({'name':node.name, 'rule': ["=",["fact","boardserialnumber"],node.serial_number]})
             razor_policy_data = json.dumps({"name": node.name, "repo": "centos7", "task": "centos", "broker": "puppet", "enabled": True,
                     "hostname": "{}.{}".format(node.name, node.dns_search),"root_password": "secret", "max_count": 20, "tags": [node.name] }) 
             Utils.razor_write(razor_tag_data, 'create-tag')
@@ -198,7 +199,7 @@ def node_edit(request, node_id):
                    if node.brand_new:
                        node.brand_new = False
             node.save()
-            return HttpResponseRedirect(reverse('node:list', kwargs={'client_id': client_id}))
+            return HttpResponseRedirect(reverse('node:list'))
         else:
             return HttpResponse(form)
     nodeForm = NodeForm()

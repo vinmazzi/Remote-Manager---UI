@@ -3,13 +3,13 @@ from django.http import HttpResponse, HttpResponseRedirect
 
 class Utils:
     def razor_write(data_json, command):
-       url = "http://192.168.122.38:8150/api/commands/{}".format(command)
+       url = "http://192.168.1.102:8150/api/commands/{}".format(command)
        #json_data = json.dumps({'name':'teste2', 'rule': ["=",["fact","serialnumber"],"MeuSerialEEETRYHS-44"]})
        r = requests.post(url, data=data_json, headers={'Content-Type':'application/json'})
        return r
 
     def redis_write(key_name, value):
-       host_ip = "192.168.122.132"
+       host_ip = "192.168.1.201"
        tcp_port = 6379
        try:
            rc = redis.StrictRedis(host=host_ip, port=tcp_port, db=0)
@@ -21,7 +21,7 @@ class Utils:
        ssh = paramiko.SSHClient()
        try:
            ssh.load_system_host_keys()
-           ssh.connect('192.168.122.132', username="mcollective", password="mcollective")
+           ssh.connect('192.168.1.201', username="mcollective", password="mcollective")
            stdin, stdout,stder = ssh.exec_command("/opt/puppetlabs/bin/mco puppet runonce -F group_name={}".format(group_name))
            ssh.close
        except Exception as err:

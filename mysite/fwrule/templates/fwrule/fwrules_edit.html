@@ -1,27 +1,130 @@
 {% load static %}
-  <link rel="stylesheet" href="{% static 'assets/js/jquery-ui/css/no-theme/jquery-ui-1.10.3.custom.min.css' %}">
-  <link rel="stylesheet" href="{% static 'assets/css/font-icons/entypo/css/entypo.css' %}">
-  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noto+Sans:400,700,400italic">
-  <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
-  <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
-  <link rel="stylesheet" href="{% static 'assets/css/neon-core.css' %}">
-  <link rel="stylesheet" href="{% static 'assets/css/neon-theme.css' %}">
-  <link rel="stylesheet" href="{% static 'assets/css/neon-forms.css' %}">
-  <link rel="stylesheet" href="{% static 'assets/css/custom.css' %}">
+<script type="text/javascript">
+   $(document).ready(function() {
 
-  <script src="{% static 'assets/js/jquery-1.11.0.min.js' %}"></script>
+   $("#source-edit").change(function(){
+     if($("#source-edit").val() == "custom") {
+      $("#source-edit-custom").show();
+     } else {
+      $("#source-edit-custom").hide();
+     }
+   });
+   $("#destination-edit").change(function(){
+     if($("#destination-edit").val() == "custom") {
+      $("#destination-edit-custom").show();
+     } else {
+      $("#destination-edit-custom").hide();
+     }
+   });
+    if($("#table-edit").val() == "nat") {
+      {% if fwrule.chain == "POSTROUTING" %}
+        $("#chain-edit").append($("<option></option>").attr("value","POSTROUTING").attr("selected", "true").text("POSTROUTING"));
+      {% else %}
+        $("#chain-edit").append($("<option></option>").attr("value","POSTROUTING").text("POSTROUTING"));
+      {% endif %}
 
-  <!--[if lt IE 9]><script src="assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+      {% if fwrule.chain == "PREROUTING" %}
+        $("#chain-edit").append($("<option></option>").attr("value","PREROUTING").attr("selected", "true").text("PREROUTING"));
+      {% else %}
+        $("#chain-edit").append($("<option></option>").attr("value","PREROUTING").text("PREROUTING"));
+      {% endif %}
 
-  <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-  <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-  <![endif]-->
+      {% if fwrule.chain == "INPUT" %}
+        $("#chain-edit").append($("<option></option>").attr("value","INPUT").attr("selected", "true").text("INPUT"));
+      {% else %}
+        $("#chain-edit").append($("<option></option>").attr("value","INPUT").text("INPUT"));
+      {% endif %}
 
-<div class="page-body" >
-	<div class="main-content">
-  <script src="{% static 'assets/js/jquery-1.11.0.min.js' %}"></script>
+      {% if fwrule.chain == "OUTPUT" %}
+        $("#chain-edit").append($("<option></option>").attr("value","OUTPUT").attr("selected", "true").text("OUTPUT"));
+      {% else %}
+        $("#chain-edit").append($("<option></option>").attr("value","OUTPUT").text("OUTPUT"));
+      {% endif %}
+
+      {% if fwrule.action == "accept" %}
+        $("#action-edit").append($("<option></option>").attr("value","accept").attr("selected","true").text("Allow"));
+      {% else %}
+        $("#action-edit").append($("<option></option>").attr("value","accept").text("Allow"));
+      {% endif %}
+
+      {% if fwrule.action == "deny" %}
+        $("#action-edit").append($("<option></option>").attr("value","deny").attr("selected", "true").text("Deny"));
+      {% else %}
+        $("#action-edit").append($("<option></option>").attr("value","deny").text("Deny"));
+      {% endif %}
+
+      {% if fwrule.action == "drop" %}
+        $("#action-edit").append($("<option></option>").attr("value","drop").attr("selected", "true").text("Drop"));
+      {% else %}
+        $("#action-edit").append($("<option></option>").attr("value","drop").text("Drop"));
+      {% endif %}
+
+      {% if fwrule.action == "masquerade" %}
+        $("#action-edit").append($("<option></option>").attr("value","masquerade").attr("selected", "true").text("Masquerade"));
+      {% else %}
+        $("#action-edit").append($("<option></option>").attr("value","masquerade").text("Masquerade"));
+      {% endif %}
+
+    } else if($("#table-edit").val() == "filter") {
+      {% if fwrule.chain == "INPUT" %}
+        $("#chain-edit").append($("<option></option>").attr("value","INPUT").attr("selected", "true").text("INPUT"));
+      {% else %}
+        $("#chain-edit").append($("<option></option>").attr("value","INPUT").text("INPUT"));
+      {% endif %}
+
+      {% if fwrule.chain == "OUTPUT" %}
+        $("#chain-edit").append($("<option></option>").attr("value","OUTPUT").attr("selected", "true").text("OUTPUT"));
+      {% else %}
+        $("#chain-edit").append($("<option></option>").attr("value","OUTPUT").text("OUTPUT"));
+      {% endif %}
+
+      {% if fwrule.chain == "FORWARD" %}
+        $("#chain-edit").append($("<option></option>").attr("value","FORWARD").attr("selected", "true").text("FORWARD"));
+      {% else %}
+        $("#chain-edit").append($("<option></option>").attr("value","FORWARD").text("FORWARD"));
+      {% endif %}
+
+      {% if fwrule.action == "accept" %}
+        $("#action-edit").append($("<option></option>").attr("value","accept").attr("selected","true").text("Allow"));
+      {% else %}
+        $("#action-edit").append($("<option></option>").attr("value","accept").text("Allow"));
+      {% endif %}
+
+      {% if fwrule.action == "deny" %}
+        $("#action-edit").append($("<option></option>").attr("value","deny").attr("selected", "true").text("Deny"));
+      {% else %}
+        $("#action-edit").append($("<option></option>").attr("value","deny").text("Deny"));
+      {% endif %}
+
+      {% if fwrule.action == "drop" %}
+        $("#action-edit").append($("<option></option>").attr("value","drop").attr("selected", "true").text("Drop"));
+      {% else %}
+        $("#action-edit").append($("<option></option>").attr("value","drop").text("Drop"));
+      {% endif %}
+    }
+    $("#table-edit").change(function(){
+      $("#chain-edit").find('option').remove();
+      $("#action-edit").find('option').remove();
+      if($("#table-edit").val() == "nat") {
+        $("#chain-edit").append($("<option></option>").attr("value","POSTROUTING").text("POSTROUTING"));
+        $("#chain-edit").append($("<option></option>").attr("value","PREROUTING").text("PREROUTING"));
+        $("#chain-edit").append($("<option></option>").attr("value","INPUT").text("INPUT"));
+        $("#chain-edit").append($("<option></option>").attr("value","OUTPUT").text("OUTPUT"));
+        $("#action-edit").append($("<option></option>").attr("value","accept").text("Allow"));
+        $("#action-edit").append($("<option></option>").attr("value","deny").text("Deny"));
+        $("#action-edit").append($("<option></option>").attr("value","drop").text("Drop"));
+        $("#action-edit").append($("<option></option>").attr("value","masquerade").text("Masquerade"));
+      } else if($("#table-edit").val() == "filter") {
+        $("#chain-edit").append($("<option></option>").attr("value","INPUT").text("INPUT"));
+        $("#chain-edit").append($("<option></option>").attr("value","OUTPUT").text("OUTPUT"));
+        $("#chain-edit").append($("<option></option>").attr("value","FORWARD").text("FORWARD"));
+        $("#action-edit").append($("<option></option>").attr("value","accept").text("Allow"));
+        $("#action-edit").append($("<option></option>").attr("value","deny").text("Deny"));
+        $("#action-edit").append($("<option></option>").attr("value","drop").text("Drop"));
+      }
+    });
+  });
+</script>
     <form role="form" class="form-horizontal form-groups-bordered" method="post" action="{% url 'fwrule:fwrule_edit' fwrule_id %} ">
       {% csrf_token %}
         <div class="form-group">
@@ -33,18 +136,18 @@
         </div>
         <div class="form-group">
           <label for="field-1" class="col-sm-3 control-label" style="vertical-align: middle;">{{ form.source.label_tag }}</label>
-          <div class="col-sm-2">
-            <select name="source" required="true" id="source" class="select2" data-allow-clear="true" data-placeholder="Source">
+          <div class="col-sm-4">
+            <select name="source-edit" required="true" id="source-edit" class="form-control" data-allow-clear="true" data-placeholder="Source">
               <option></option>
                 <option value="all">ALL</option>
               <optgroup label="Available Networks: ">
                 {%for network in networks %}
-                <option value="{{network.network_name}}">{{network.network_name}} Network</option>
+                <option {% if fwrule.source == network.network_name|add:"-network" %} selected="true" {% endif %} value="{{network.network_name}}-network">{{network.network_name}} Network</option>
                 {% endfor %}
               </optgroup>
               <optgroup label="Available Gateways: ">
                 {%for network in networks %}
-                <option value="{{network.network_name}}">{{network.network_name}} Gateway</option>
+                <option {% if fwrule.source == network.network_name|add:"-gateway" %} selected="true" {% endif %} value="{{network.network_name}}-gateway">{{network.network_name}} Gateway</option>
                 {% endfor %}
               </optgroup>
               <optgroup label="Custom Network: ">
@@ -52,24 +155,24 @@
               </optgroup>
             </select>
           </div>
-          <div class="col-sm-2">
-            <input type="text" class="form-control" name="source-custom" id="source-custom" style="height: 40px; display: none;" placeholder="Custom Address"/>
+          <div class="col-sm-4">
+            <input type="text" class="form-control" name="source-edit-custom" id="source-edit-custom" style="display: none;" placeholder="Custom Address"/>
           </div>
         </div>
         <div class="form-group">
           <label for="field-1" class="col-sm-3 control-label" style="vertical-align: middle;">{{ form.destination.label_tag }}</label>
-          <div class="col-sm-2">
-            <select name="destination" required="true" id="destination" class="select2" data-allow-clear="true" data-placeholder="Destination">
+          <div class="col-sm-4">
+            <select name="destination-edit" required="true" id="destination-edit" class="form-control" data-allow-clear="true" data-placeholder="Destination">
               <option></option>
                 <option value="all">ALL</option>
               <optgroup label="Available Networks: ">
                 {%for network in networks %}
-                <option value="{{network.network_name}}">{{network.network_name}} Network</option>
+                <option {% if fwrule.destination == network.network_name|add:"-network" %} selected="true" {% endif %} value="{{network.network_name}}-network">{{network.network_name}} Network</option>
                 {% endfor %}
               </optgroup>
               <optgroup label="Available Gateways: ">
                 {%for network in networks %}
-                <option value="{{network.network_name}}">{{network.network_name}} Gateway</option>
+                <option {% if fwrule.destination == network.network_name|add:"-gateway" %} selected="true" {% endif %} value="{{network.network_name}}-gateway">{{network.network_name}} Gateway</option>
                 {% endfor %}
               </optgroup>
               <optgroup label="Custom Network: ">
@@ -77,47 +180,47 @@
               </optgroup>
             </select>
           </div>
-          <div class="col-sm-2">
-            <input type="text" class="form-control" name="destination-custom" id="destination-custom" style="height: 40px; display: none;" placeholder="Custom Address"/>
+          <div class="col-sm-4">
+            <input type="text" class="form-control" name="destination-edit-custom" id="destination-edit-custom" style="display: none;" placeholder="Custom Address"/>
           </div>
         </div>
         <div class="form-group">
           <label for="field-1" class="col-sm-3 control-label">{{ form.proto.label_tag }}</label>
 
-          <div class="col-sm-2">
+          <div class="col-sm-3">
             <!--{{ form.proto }}-->
-            <select name="protocol"  required="true" class="select2" data-allow-clear="true" data-placeholder="Protocol">
+            <select name="protocol-edit"  required="true" class="form-control" data-allow-clear="true" data-placeholder="Protocol">
               <option></option>
               <optgroup label="Available Protocols">
-              <option value="tcp">TCP</option>
-              <option value="udp">UDP</option>
-              <option value="icmp">ICMP</option>
-              <option value="all">ALL</option>
+              <option {%if fwrule.proto == "tcp" %} selected="true" {%endif%} value="tcp">TCP</option>
+              <option {%if fwrule.proto == "udp" %} selected="true" {%endif%} value="udp">UDP</option>
+              <option {%if fwrule.proto == "icmp" %} selected="true" {%endif%} value="icmp">ICMP</option>
+              <option {% if fwrule.proto == "all" %} selected="true" {%endif%} value="all">ALL</option>
               </optgroup>
             </select>
           </div>
         </div>
         <div class="form-group">
           <label for="field-1" class="col-sm-3 control-label">{{ form.sport.label_tag }}</label>
-
-          <div class="col-sm-1">
+          <div class="col-sm-2">
+            {{form.sport}}
           </div>
         </div>
         <div class="form-group">
           <label for="field-1" class="col-sm-3 control-label">{{ form.dport.label_tag }}</label>
-
-          <div class="col-sm-1">
+          <div class="col-sm-2">
+            {{form.dport }}
           </div>
         </div>
         <div class="form-group">
           <label for="field-1" class="col-sm-3 control-label">{{ form.table.label_tag }}</label>
 
-          <div class="col-sm-2">
-            <select name="table"  required="true" id="table" class="select2" data-allow-clear="true" data-placeholder="Table">
+          <div class="col-sm-3">
+            <select name="table-edit"  required="true" id="table-edit" class="form-control" data-allow-clear="true" data-placeholder="Table">
               <option></option>
               <optgroup label="Available Tables">
-              <option value="filter">FILTER</option>
-              <option value="nat">NAT</option>
+              <option {% if fwrule.table == "filter" %} selected="true" {%endif%} value="filter">FILTER</option>
+              <option {% if fwrule.table == "nat" %} selected="true" {%endif%} value="nat">NAT</option>
               </optgroup>
             </select>
           </div>
@@ -125,8 +228,8 @@
         <div class="form-group">
           <label for="field-1" class="col-sm-3 control-label">{{ form.chain.label_tag }}</label>
 
-          <div class="col-sm-2">
-            <select name="chain"  required="true" id="chain" class="select2" data-allow-clear="true" data-placeholder="Protocol">
+          <div class="col-sm-3">
+            <select name="chain-edit"  required="true" id="chain-edit" class="form-control" data-allow-clear="true" data-placeholder="Protocol">
               <option></option>
               <optgroup label="Available Chains">
               </optgroup>
@@ -136,8 +239,8 @@
         <div class="form-group">
           <label for="field-1" class="col-sm-3 control-label">{{ form.action.label_tag }}</label>
 
-          <div class="col-sm-2">
-            <select name="action"  required="true" id="action" class="select2" data-allow-clear="true" data-placeholder="Actions">
+          <div class="col-sm-3">
+            <select name="action-edit"  required="true" id="action-edit" class="form-control" data-allow-clear="true" data-placeholder="Actions">
               <option></option>
               <optgroup label="Available Actions">
               </optgroup>
@@ -152,35 +255,3 @@
     </form>
 	</div>
 </div>
-  <link rel="stylesheet" href="{% static 'assets/js/jvectormap/jquery-jvectormap-1.2.2.css' %}">
-  <link rel="stylesheet" href="{% static 'assets/js/rickshaw/rickshaw.min.css' %}">
-  <link rel="stylesheet" href="{% static 'assets/js/select2/select2-bootstrap.css'%}">
-  <link rel="stylesheet" href="{% static 'assets/js/select2/select2.css'%}">
-  <!-- Bottom Scripts -->
-  <script src="{% static 'assets/js/gsap/main-gsap.js' %}"></script>
-  <script src="{% static 'assets/js/jquery-ui/js/jquery-ui-1.10.3.minimal.min.js' %}"></script>
-  <script src="{% static 'assets/js/bootstrap.js' %}"></script>
-  <script src="{% static 'assets/js/bootstrap.min.js' %}"></script>
-  <script src="{% static 'assets/js/aci-tree/js/jquery.min.js' %}"></script>
-  <script src="{% static 'assets/js/joinable.js' %}"></script>
-  <script src="{% static 'assets/js/resizeable.js' %}"></script>
-  <script src="{% static 'assets/js/neon-api.js' %}"></script>
-  <script src="{% static 'assets/js/jvectormap/jquery-jvectormap-1.2.2.min.js' %}"></script>
-  <script src="{% static 'assets/js/jvectormap/jquery-jvectormap-europe-merc-en.js' %}"></script>
-  <script src="{% static 'assets/js/jquery.sparkline.min.js' %}"></script>
-  <script src="{% static 'assets/js/jquery.dataTables.min.js' %}"></script>
-  <script src="{% static 'assets/js/datatables/TableTools.min.js'%}"></script>
-  <script src="{% static 'assets/js/dataTables.bootstrap.js'%}"></script>
-  <script src="{% static 'assets/js/datatables/jquery.dataTables.columnFilter.js'%}"></script>
-  <script src="{% static 'assets/js/datatables/lodash.min.js'%}"></script>
-  <script src="{% static 'assets/js/datatables/responsive/js/datatables.responsive.js'%}"></script>
-  <script src="{% static 'assets/js/select2/select2.min.js'%}"></script>
-  <script src="{% static 'assets/js/rickshaw/vendor/d3.v3.js' %}"></script>
-  <script src="{% static 'assets/js/rickshaw/rickshaw.min.js' %}"></script>
-  <script src="{% static 'assets/js/raphael-min.js' %}"></script>
-  <script src="{% static 'assets/js/morris.min.js' %}"></script>
-  <script src="{% static 'assets/js/toastr.js' %}"></script>
-  <script src="{% static 'assets/js/neon-chat.js' %}"></script>
-  <script src="{% static 'assets/js/neon-custom.js' %}"></script>
-  <script src="{% static 'assets/js/neon-demo.js' %}"></script>
-  <script src="{% static 'assets/js/bootstrap-tagsinput.min.js' %}"></script>

@@ -1,0 +1,241 @@
+{% load static %}
+<head>
+
+<link rel="stylesheet" href="{% static 'assets/js/select2/select2-bootstrap.css'%}">
+<link rel="stylesheet" href="{% static 'assets/js/select2/select2.css'%}">
+<link rel="stylesheet" href="{% static 'assets/js/jquery-ui/css/no-theme/jquery-ui-1.10.3.custom.min.css' %}">
+<link rel="stylesheet" href="{% static 'assets/css/font-icons/entypo/css/entypo.css' %}">
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noto+Sans:400,700,400italic">
+<link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
+<link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
+<link rel="stylesheet" href="{% static 'assets/css/neon-core.css' %}">
+<link rel="stylesheet" href="{% static 'assets/css/neon-theme.css' %}">
+<link rel="stylesheet" href="{% static 'assets/css/neon-forms.css' %}">
+<link rel="stylesheet" href="{% static 'assets/css/custom.css' %}">
+<link rel="stylesheet" href="{% static 'assets/js/datatables/responsive/css/datatables.responsive.css'%}">
+
+  <link rel="stylesheet" href="{% static 'assets/js/jvectormap/jquery-jvectormap-1.2.2.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/js/rickshaw/rickshaw.min.css' %}">
+  <!-- Bottom Scripts -->
+<script src="{% static 'assets/js/jquery-1.11.0.min.js' %}"></script>
+  <script src="{% static 'assets/js/gsap/main-gsap.js' %}"></script>
+  <script src="{% static 'assets/js/jquery-ui/js/jquery-ui-1.10.3.minimal.min.js' %}"></script>
+  <script src="{% static 'assets/js/bootstrap.js' %}"></script>
+  <script src="{% static 'assets/js/bootstrap.min.js' %}"></script>
+  <script src="{% static 'assets/js/aci-tree/js/jquery.min.js' %}"></script>
+  <script src="{% static 'assets/js/joinable.js' %}"></script>
+  <script src="{% static 'assets/js/resizeable.js' %}"></script>
+  <script src="{% static 'assets/js/neon-api.js' %}"></script>
+  <script src="{% static 'assets/js/jvectormap/jquery-jvectormap-1.2.2.min.js' %}"></script>
+  <script src="{% static 'assets/js/jvectormap/jquery-jvectormap-europe-merc-en.js' %}"></script>
+  <script src="{% static 'assets/js/jquery.sparkline.min.js' %}"></script>
+  <script src="{% static 'assets/js/jquery.dataTables.min.js' %}"></script>
+  <script src="{% static 'assets/js/datatables/TableTools.min.js'%}"></script>
+  <script src="{% static 'assets/js/dataTables.bootstrap.js'%}"></script>
+  <script src="{% static 'assets/js/datatables/jquery.dataTables.columnFilter.js'%}"></script>
+  <script src="{% static 'assets/js/datatables/lodash.min.js'%}"></script>
+  <script src="{% static 'assets/js/datatables/responsive/js/datatables.responsive.js'%}"></script>
+  <script src="{% static 'assets/js/select2/select2.min.js'%}"></script>
+  <script src="{% static 'assets/js/rickshaw/vendor/d3.v3.js' %}"></script>
+  <script src="{% static 'assets/js/rickshaw/rickshaw.min.js' %}"></script>
+  <script src="{% static 'assets/js/raphael-min.js' %}"></script>
+  <script src="{% static 'assets/js/morris.min.js' %}"></script>
+  <script src="{% static 'assets/js/toastr.js' %}"></script>
+  <script src="{% static 'assets/js/neon-chat.js' %}"></script>
+  <script src="{% static 'assets/js/neon-custom.js' %}"></script>
+  <script src="{% static 'assets/js/neon-demo.js' %}"></script>
+  <script src="{% static 'assets/js/bootstrap-tagsinput.min.js' %}"></script>
+
+<script src="{% static 'assets/js/gsap/main-gsap.js'%}"></script>
+<script src="{% static 'assets/js/jquery-ui/js/jquery-ui-1.10.3.minimal.min.js'%}"></script>
+<script src="{% static 'assets/js/bootstrap.js'%}"></script>
+<script src="{% static 'assets/js/joinable.js'%}"></script>
+<script src="{% static 'assets/js/resizeable.js'%}"></script>
+<script src="{% static 'assets/js/neon-api.js'%}"></script>
+<script src="{% static 'assets/js/jquery.dataTables.min.js'%}"></script>
+<script src="{% static 'assets/js/datatables/TableTools.min.js'%}"></script>
+<script src="{% static 'assets/js/dataTables.bootstrap.js'%}"></script>
+<script src="{% static 'assets/js/datatables/jquery.dataTables.columnFilter.js'%}"></script>
+<script src="{% static 'assets/js/datatables/lodash.min.js'%}"></script>
+<script src="{% static 'assets/js/datatables/responsive/js/datatables.responsive.js'%}"></script>
+<script src="{% static 'assets/js/select2/select2.min.js'%}"></script>
+<script src="{% static 'assets/js/neon-chat.js'%}"></script>
+<script src="{% static 'assets/js/neon-custom.js'%}"></script>
+<script src="{% static 'assets/js/neon-demo.js'%}"></script>
+<script src="{% static 'assets/js/toastr.js' %}"></script>
+<script type="text/javascript">
+   $(document).ready(function() {
+
+   $("#source").change(function(){
+     if($("#source").val() == "custom") {
+      $("#source-custom").show();
+     } else {
+      $("#source-custom").hide();
+     }
+   });
+   $("#destination").change(function(){
+     if($("#destination").val() == "custom") {
+      $("#destination-custom").show();
+     } else {
+      $("#destination-custom").hide();
+     }
+   });
+    $("#table").change(function(){
+      $("#chain").find('option').remove();
+      $("#action").find('option').remove();
+      if($("#table").val() == "nat") {
+        $("#chain").append($("<option></option>").attr("value","POSTROUTING").text("POSTROUTING"));
+        $("#chain").append($("<option></option>").attr("value","PREROUTING").text("PREROUTING"));
+        $("#chain").append($("<option></option>").attr("value","INPUT").text("INPUT"));
+        $("#chain").append($("<option></option>").attr("value","OUTPUT").text("OUTPUT"));
+        $("#action").append($("<option></option>").attr("value","accept").text("Allow"));
+        $("#action").append($("<option></option>").attr("value","deny").text("Deny"));
+        $("#action").append($("<option></option>").attr("value","drop").text("Drop"));
+        $("#action").append($("<option></option>").attr("value","masquerade").text("Masquerade"));
+      } else if($("#table").val() == "filter") {
+        $("#chain").append($("<option></option>").attr("value","INPUT").text("INPUT"));
+        $("#chain").append($("<option></option>").attr("value","OUTPUT").text("OUTPUT"));
+        $("#chain").append($("<option></option>").attr("value","FORWARD").text("FORWARD"));
+        $("#action").append($("<option></option>").attr("value","accept").text("Allow"));
+        $("#action").append($("<option></option>").attr("value","deny").text("Deny"));
+        $("#action").append($("<option></option>").attr("value","drop").text("Drop"));
+      }
+    });
+  });
+</script>
+</head>
+<div class="panel-heading">
+  <div class="panel-title">
+    Edit Firewall Rule
+  </div>
+</div>
+  <div class="panel-body">
+    <form role="form" class="form-horizontal form-groups-bordered" method="post" action="{% url 'fwrule:fwrule_edit' fwrule_id %} ">
+      {% csrf_token %}
+        <div class="form-group">
+          <label for="field-1" class="col-sm-3 control-label">{{ form.rule_name_text.label_tag }}</label>
+
+          <div class="col-sm-3">
+            {{ form.rule_name_text }}
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="field-1" class="col-sm-3 control-label" style="vertical-align: middle;">{{ form.source.label_tag }}</label>
+          <div class="col-sm-2">
+            <select name="source" required="true" id="source" class="select2" data-allow-clear="true" data-placeholder="Source">
+              <option></option>
+                <option value="all">ALL</option>
+              <optgroup label="Available Networks: ">
+                {%for network in networks %}
+                <option value="{{network.network_name}}">{{network.network_name}} Network</option>
+                {% endfor %}
+              </optgroup>
+              <optgroup label="Available Gateways: ">
+                {%for network in networks %}
+                <option value="{{network.network_name}}">{{network.network_name}} Gateway</option>
+                {% endfor %}
+              </optgroup>
+              <optgroup label="Custom Network: ">
+                <option value="custom">Inform Ip</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="col-sm-2">
+            <input type="text" class="form-control" name="source-custom" id="source-custom" style="height: 40px; display: none;" placeholder="Custom Address"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="field-1" class="col-sm-3 control-label" style="vertical-align: middle;">{{ form.destination.label_tag }}</label>
+          <div class="col-sm-2">
+            <select name="destination" required="true" id="destination" class="select2" data-allow-clear="true" data-placeholder="Destination">
+              <option></option>
+                <option value="all">ALL</option>
+              <optgroup label="Available Networks: ">
+                {%for network in networks %}
+                <option value="{{network.network_name}}">{{network.network_name}} Network</option>
+                {% endfor %}
+              </optgroup>
+              <optgroup label="Available Gateways: ">
+                {%for network in networks %}
+                <option value="{{network.network_name}}">{{network.network_name}} Gateway</option>
+                {% endfor %}
+              </optgroup>
+              <optgroup label="Custom Network: ">
+                <option value="custom">Inform Ip</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="col-sm-2">
+            <input type="text" class="form-control" name="destination-custom" id="destination-custom" style="height: 40px; display: none;" placeholder="Custom Address"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="field-1" class="col-sm-3 control-label">{{ form.proto.label_tag }}</label>
+
+          <div class="col-sm-2">
+            <!--{{ form.proto }}-->
+            <select name="protocol"  required="true" class="select2" data-allow-clear="true" data-placeholder="Protocol">
+              <option></option>
+              <optgroup label="Available Protocols">
+              <option value="tcp">TCP</option>
+              <option value="udp">UDP</option>
+              <option value="icmp">ICMP</option>
+              <option value="all">ALL</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="field-1" class="col-sm-3 control-label">{{ form.sport.label_tag }}</label>
+
+          <div class="col-sm-1">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="field-1" class="col-sm-3 control-label">{{ form.dport.label_tag }}</label>
+
+          <div class="col-sm-1">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="field-1" class="col-sm-3 control-label">{{ form.table.label_tag }}</label>
+
+          <div class="col-sm-2">
+            <select name="table"  required="true" id="table" class="select2" data-allow-clear="true" data-placeholder="Table">
+              <option></option>
+              <optgroup label="Available Tables">
+              <option value="filter">FILTER</option>
+              <option value="nat">NAT</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="field-1" class="col-sm-3 control-label">{{ form.chain.label_tag }}</label>
+
+          <div class="col-sm-2">
+            <select name="chain"  required="true" id="chain" class="select2" data-allow-clear="true" data-placeholder="Protocol">
+              <option></option>
+              <optgroup label="Available Chains">
+              </optgroup>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="field-1" class="col-sm-3 control-label">{{ form.action.label_tag }}</label>
+
+          <div class="col-sm-2">
+            <select name="action"  required="true" id="action" class="select2" data-allow-clear="true" data-placeholder="Actions">
+              <option></option>
+              <optgroup label="Available Actions">
+              </optgroup>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-sm-offset-3 col-sm-5">
+            <button type="submit" class="btn btn-default">Submit</button>
+          </div>
+        </div>
+    </form>
+</div>

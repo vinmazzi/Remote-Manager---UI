@@ -98,7 +98,7 @@ DATABASES = {
         'NAME': 'mzbox',
         'USER': 'mzbox_user',
         'PASSWORD': 'mzbox_user',
-        'HOST': '192.168.122.132',
+        'HOST': '192.168.1.201',
         'PORT': '5432',
     }
 }
