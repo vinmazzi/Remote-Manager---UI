@@ -78,6 +78,7 @@ function send_or_edit (my_action, my_form) {
                   <th>Network Name</th>
                   <th>Network Interface</th>
                   <th>Network Description</th>
+                  <th>Network Type</th>
                   <th></th>
                 </tr>
               </thead>
@@ -95,6 +96,11 @@ function send_or_edit (my_action, my_form) {
                   <td>{{network.network_name}}</td>
                   <td>{{network.network_interface}}</td>
                   <td>{{network.network_description}}</td>
+                  {% if network.network_bridge %}
+                  <td>Bridge</td>
+                  {% else %}
+                  <td>Ethernet</td>
+                  {% endif %}
                   <td>
                     <a href="#" onclick="show_modal({{ network.pk }});" class="btn btn-default btn-sm btn-icon icon-left"> <i class="entypo-pencil"></i> Edit </a>
                     <a href="#" name="form-{{network.pk}}" class="btn btn-danger btn-sm btn-icon icon-left" onclick="send_or_edit('delete', this.name);">
@@ -122,22 +128,36 @@ function send_or_edit (my_action, my_form) {
                 {% csrf_token %}
                 <div class="form-group">
                   <label for="field-1" class="col-sm-3 control-label">{{ form.network_name.label_tag }}</label>
-                  <div class="col-sm-5">
+                  <div class="col-sm-3">
                     {{ form.network_name }}
                   </div>
                 </div>
                 <div class="form-group">
                   <label for="field-1" class="col-sm-3 control-label">{{ form.network_interface.label_tag }}</label>
-                  <div class="col-sm-5">
-                    {{ form.network_interface }}
+                  <div class="col-sm-2">
+                    <select name="network_interface" required="true" id="network_interface" class="select2" data-allow-clear="true" data-placeholder="Interface">
+                      <option></option>
+                      {% for interface in interfaces %}
+                      <option value={{interface}}> {{ interface }}</option>
+                      {% endfor %}
+                    </select>
+                    {#     {{ form.network_interface }} #}
                   </div>
                 </div>
                 <div class="form-group">
                   <label for="field-1" class="col-sm-3 control-label">{{ form.network_description.label_tag }}</label>
 
-                  <div class="col-sm-5">
+                  <div class="col-sm-3">
                     {{ form.network_description }}
                   </div>
+                </div>
+                <div class="form-group">
+                  <label for="field-1" class="col-sm-3 control-label">Bridge: </label>
+									<div class="col-sm-5">
+                  <div class="make-switch">
+                      <input name="bridge" id="bridge" type="checkbox" value="on"/>
+                  </div>
+                 </div>
                 </div>
                 <div class="form-group">
                   <div class="col-sm-offset-3 col-sm-5">
@@ -174,6 +194,7 @@ function send_or_edit (my_action, my_form) {
   <script src="{% static 'assets/js/neon-chat.js'%}"></script>
   <script src="{% static 'assets/js/neon-custom.js'%}"></script>
   <script src="{% static 'assets/js/neon-demo.js'%}"></script>
+  <script src="{% static 'assets/js/bootstrap-switch.min.js'%}"></script>
 {% endblock %}
 
 {% block modals %}

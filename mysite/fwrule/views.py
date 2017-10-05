@@ -43,9 +43,9 @@ def fwrules_redis_format(fwrules):
 
        if Network.objects.filter(network_name=f.destination.split("-")[0]):
            network = Network.objects.filter(network_name=f.destination.split("-")[0])[0]
-           if "network" in f.source:
+           if "network" in f.destination:
                dict_f['destination'] = "%%{facts.networking.interfaces.%s.network}" %(network.network_interface)
-           elif "gateway" in f.source:
+           elif "gateway" in f.destination:
                dict_f['destination'] = "%%{facts.networking.interfaces.%s.ip}" %(network.network_interface)
 
        for key,value in dict_f.items():

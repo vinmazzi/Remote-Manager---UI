@@ -15,11 +15,15 @@ def network_list(request, group_id):
     group = Group.objects.get(pk=group_id)
     if request.method == 'POST':
         form = NetworkForm(request.POST)
+        bridge = request.POST.get('bridge')
+        interface = request.POST.get('network_interface')
+        bridge = ( False if bridge == None else True )
         if form.is_valid():
             new_network = group.network_set.create(
                     network_name = form.cleaned_data['network_name'],
-                    network_interface = form.cleaned_data['network_interface'],
+                    network_interface = interface,
                     network_description = form.cleaned_data['network_description'],
+                    network_bridge = bridge,
                     group_fk = group,
                     )
             new_network.save()
@@ -31,9 +35,14 @@ def network_list(request, group_id):
             form.fields[field].widget.__dict__['attrs'].update({'class': 'form-control autogrow'})
             form.fields[field].widget.__dict__['attrs'].update({'style': 'height: 48px'})
     networks = group.network_set.all()
+    av_interfaces = ['eth0', 'eth1', 'eth2', 'eth3', 'eth4', 'eth5', 'eth6']
+    for network in networks:
+        if network.network_interface in av_interfaces:
+            av_interfaces.remove(network.network_interface)
     return render(request, 'network/group_network_list.html',{
             'group': group,
             'form': form,
+            'interfaces': av_interfaces,
             'networks': networks
             })
 

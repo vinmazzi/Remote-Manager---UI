@@ -7,6 +7,7 @@ from node.models import Node
 class Network(models.Model):
     network_name  = models.CharField(max_length=20)
     network_bridge = models.BooleanField(default=False)
+    network_bridge_name = models.CharField(max_length=20, default="N/A") 
     network_description = models.CharField(max_length=100, default="N/A")
     network_interface = models.CharField(max_length=7, default="N/A")
     group_fk   = models.ForeignKey(Group, on_delete=models.CASCADE, default=0)

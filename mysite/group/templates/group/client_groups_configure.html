@@ -53,19 +53,6 @@
     <a href="#">
       <div class="tile-title tile-blue">
         <div class="icon">
-          <i class="entypo entypo-address"></i>
-        </div>
-        <div class="title">
-          <h3>Routes</h3>
-          <p>Configure Routes</p>
-        </div>
-      </div>
-    </a>
-	</div>
-	<div class="col-sm-3">
-    <a href="#">
-      <div class="tile-title tile-blue">
-        <div class="icon">
           <i class="entypo entypo-flow-line"></i>
         </div>
         <div class="title">
@@ -118,11 +105,24 @@
     <a href="#">
       <div class="tile-title tile-blue">
         <div class="icon">
-          <i class="entypo entypo-cloud"></i>
+          <i class="entypo entypo-monitor"></i>
         </div>
         <div class="title">
-          <h3>Proxy</h3>
-          <p>Configure Proxy</p>
+          <h3>Virtual Server</h3>
+          <p>Configure Virtual Server</p>
+        </div>
+      </div>
+    </a>
+	</div>
+	<div class="col-sm-3">
+    <a href="{% url 'micro_service:options' group_id=group.id %}">
+      <div class="tile-title tile-blue">
+        <div class="icon">
+          <i class="entypo entypo-doc-text-inv"></i>
+        </div>
+        <div class="title">
+          <h3>Micro Services</h3>
+          <p>Configura Micro Services</p>
         </div>
       </div>
     </a>
@@ -157,19 +157,6 @@
     <a href="#">
       <div class="tile-title tile-blue">
         <div class="icon">
-          <i class="entypo entypo-monitor"></i>
-        </div>
-        <div class="title">
-          <h3>Virtual Server</h3>
-          <p>Configure Virtual Server</p>
-        </div>
-      </div>
-    </a>
-	</div>
-	<div class="col-sm-3">
-    <a href="#">
-      <div class="tile-title tile-blue">
-        <div class="icon">
           <i class="glyphicon glyphicon-usd"></i>
         </div>
         <div class="title">
@@ -180,6 +167,5 @@
     </a>
 	</div>
 </div>
-
 <br />
 {% endblock %}

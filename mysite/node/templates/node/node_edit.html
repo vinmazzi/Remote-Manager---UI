@@ -124,13 +124,13 @@ Dashboard
       {% if network.network_interface not in interface_set %}
       if($("#{{ network.network_name}}_method").val() == "static"){
            $("#{{network.network_name}}_collapse").show();
-          }else{
-            $("#{{network.network_name}}_collapse").hide();
-          }
+      }else{
+           $("#{{network.network_name}}_collapse").hide();
+      }
 
-         $("#{{network.network_name}}_method").change(function() {
-           $("#{{network.network_name}}_collapse").toggle();
-          });
+      $("#{{network.network_name}}_method").change(function() {
+         $("#{{network.network_name}}_collapse").toggle();
+      });
 
       {% endif %}
       {% endfor %}
@@ -147,11 +147,15 @@ Dashboard
           <div class="form-group">
             <label for="field-1" class="col-sm-3 control-label">{{ interface.network_fk.network_name}} Method: </label>
             <div class="col-sm-5">
+              {% if interface.bridge == True %}
+              <input class="form-control" type="text" id="{{interface.network_fk.network_name}}_method" name="{{interface.network_fk.network_name}}_method" value="static" readonly/>
+              {% else %}
               <select  class="selectboxit" data-first-option="false" id="{{interface.network_fk.network_name}}_method" name="{{interface.network_fk.network_name}}_method">
 						  	<option>Methods</option>
                 <option value="static"  {% if interface.method == "static" %}selected="true" {% endif %} >Static</option>
                 <option value="dhcp" {% if interface.method == "dhcp" %}selected="true" {% endif %} >Dhcp</option>
               </select>
+              {% endif %}
             </div>
             <div id="{{interface.network_fk.network_name}}_collapse_btn" >
               <a href="#" onclick="show_modal({{interface.pk }})" style="height: 30px;"  class="btn btn-default btn-icon icon-left">
@@ -198,14 +202,18 @@ Dashboard
           <div class="form-group">
             <label for="field-1" class="col-sm-3 control-label">{{ network.network_name}} Interface Method: </label>
             <div class="col-sm-5">
-              <select class="selectboxit" data-first-option="false" name="{{network.network_name}}_method">
+              {% if network.network_bridge == True %}
+              <input class="form-control" type="text" id="{{network.network_name}}_method" name="{{network.network_name}}_method" value="static" readonly/>
+              {% else %}
+              <select class="selectboxit" data-first-option="false"  id="{{network.network_name}}_method" name="{{network.network_name}}_method">
 						  	<option>Methods</option>
                 <option value="static">Static</option>
                 <option value="dhcp">Dhcp</option>
               </select>
+              {% endif %}
             </div>
           </div>
-          <div id="{{interface.network_fk.network_name}}_collapse" >
+          <div id="{{network.network_name}}_collapse" >
           <hr/>
           <div class="form-group">
             <label for="field-1" class="col-sm-3 control-label">{{ network.network_name}} Ip: </label>

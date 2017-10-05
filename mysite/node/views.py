@@ -17,7 +17,7 @@ def interface_redis_format(interfaces):
    interfaces_hash = {}
    for i in interfaces:
        dict_i = model_to_dict(i)
-       pop_keys = ['node_fk', 'network_fk', 'id', 'gateway']
+       pop_keys = ['bridge','node_fk', 'network_fk', 'id', 'gateway']
        tmp_interface_name = i.network_fk.network_interface
 
        for key,value in dict_i.items():
@@ -26,12 +26,37 @@ def interface_redis_format(interfaces):
 
        for key in pop_keys:
            dict_i.pop(key)
-   
        tmp_format = ast.literal_eval("{\'%s\': %s}" %(tmp_interface_name, dict_i))
+
+       if i.bridge:
+           for key in ['ipaddress', 'netmask']: 
+               tmp_format[tmp_interface_name].pop(key)
+           bridge_name = "br%s" %(list(filter(str.isdigit,tmp_interface_name))[0])
+           tmp_format[tmp_interface_name].update({'options': {'BRIDGE': bridge_name}})
+           bridge_hash = {bridge_name: {'method': 'static', 'options': {'TYPE': 'bridge'}, 'ipaddress': i.ipaddress,'netmask': i.netmask}}
+           tmp_format.update(bridge_hash)
        interfaces_hash.update(tmp_format)
 
    return json.dumps(interfaces_hash)
 
+def docker_network_redis_format(interfaces):
+    docker_network_hash = {}
+    for interface in interfaces:
+        if interface.bridge:
+            ip_blocks = interface.ipaddress.split('.')
+            netmask = interface.netmask
+            cidr = sum([bin(int(x)).count("1") for x in netmask.split(".")])
+            network = "{}.{}.{}.0/{}".format(ip_blocks[0],ip_blocks[1], ip_blocks[2], cidr)
+            gateway = interface.ipaddress
+            network_range = "{}.{}.{}.50/31".format(ip_blocks[0],ip_blocks[1], ip_blocks[2])
+            network_name = interface.network_fk.network_name
+            network_type = "bridge"
+            bridge_name = "br%s" %(list(filter(str.isdigit,interface.network_fk.network_interface))[0])
+            options = "com.docker.network.bridge.name={}".format(bridge_name)
+            tmp_hash = {network_name: {'driver': network_type, 'subnet': network, 'gateway': gateway, 'ip_range': network_range, 'options': options}}
+            docker_network_hash.update(tmp_hash)
+    return json.dumps(docker_network_hash)
+    
 def puppetdb_query(query):
     url_values = urllib.parse.urlencode({'query': query})
     url = 'http://192.168.1.201:8080/pdb/query/v4/facts'
@@ -84,17 +109,19 @@ def node_create(request, store_id):
             key_value = store.group_fk.group_name
             Utils.redis_write(key_name, key_value)
             for network in node.group_fk.network_set.all():
-                method_value = request.POST.get("{}_method".format(network.network_name))
+                method_value = ("static" if network.network_bridge else request.POST.get("{}_method".format(network.network_name)))
                 ip_value = request.POST.get("{}_ip".format(network.network_name))
                 netmask_value = request.POST.get("{}_netmask".format(network.network_name))
                 gateway_value = request.POST.get("{}_gateway".format(network.network_name))
+                bridge = network.network_bridge
                 if network.network_interface not in str(node.interface_set.all()):
                     node.interface_set.create(
-                            method = method_value,
-                            ipaddress = ip_value,
-                            netmask = netmask_value,
-                            gateway = gateway_value,
-                            network_fk = network, 
+                              method = method_value,
+                              ipaddress = ip_value,
+                              bridge = brdige,
+                              netmask = netmask_value,
+                              gateway = gateway_value,
+                              network_fk = network, 
                             )
                 else:
                     iface = node.interface_set.get(network_fk=network)
@@ -107,11 +134,15 @@ def node_create(request, store_id):
                        iface.ipaddress = ip_value
                        iface.netmask = netmask_value
                        iface.gateway = gateway_value
+                       iface.bridge = bridge
                     iface.network_fk = network
                     iface.save()
             interfaces_json = interface_redis_format(node.interface_set.all())
             interfaces_key = "{}:{}:network_interfaces".format(node.client_fk.client_name, node.name)
+            docker_network_json = docker_network_redis_format(node.interface_set.all())
+            docker_network_key = "{}:{}:docker_networks".format(node.client_fk.client_name, node.name)
             Utils.redis_write(interfaces_key, interfaces_json)
+            Utils.redis_write(docker_network_key, docker_network_json)
 
             #razor_tag_data = json.dumps({'name':node.name, 'rule': ["=",["fact","serialnumber"],node.serial_number]})
             razor_tag_data = json.dumps({'name':node.name, 'rule': ["=",["fact","boardserialnumber"],node.serial_number]})
@@ -164,6 +195,7 @@ def node_edit(request, node_id):
             ip_value = request.POST.get("{}_ip".format(network.network_name))
             netmask_value = request.POST.get("{}_netmask".format(network.network_name))
             gateway_value = request.POST.get("{}_gateway".format(network.network_name))
+            bridge = network.network_bridge
             if network.network_interface not in str(node.interface_set.all()):
                 node.interface_set.create(
                         method = method_value,
@@ -171,6 +203,7 @@ def node_edit(request, node_id):
                         netmask = netmask_value,
                         gateway = gateway_value,
                         network_fk = network, 
+                        bridge = bridge,
                         )
             else:
                 iface = node.interface_set.get(network_fk=network)
@@ -188,6 +221,9 @@ def node_edit(request, node_id):
 
         interfaces_json = interface_redis_format(node.interface_set.all())
         interfaces_key = "Renner:{}:network_interfaces".format(node.name)
+        docker_network_json = docker_network_redis_format(node.interface_set.all())
+        docker_network_key = "{}:{}:docker_networks".format(node.client_fk.client_name, node.name)
+        Utils.redis_write(docker_network_key, docker_network_json)
         Utils.redis_write(interfaces_key, interfaces_json)
         Utils.run_puppet(node.group_fk.group_name)
 
