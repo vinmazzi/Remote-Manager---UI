@@ -1,0 +1,68 @@
+{% extends 'group/header.html' %}
+{% block title %} Configure Micro Services {% endblock %}
+{% block content %}
+
+      <ol class="breadcrumb bc-3">
+            <li>
+        <a href="index.html"><i class="entypo-home"></i>Home</a>
+      </li>
+          <li>
+              <a href="layout-api.html">Groups</a>
+          </li>
+          <li>
+            <a href="#">{{ group.group_name }}</a>
+          </li>
+          <li>
+              <a href="layout-api.html">Micro Services</a>
+          </li>
+        <li class="active">
+
+              <strong>Configure Micro Services</strong>
+          </li>
+          </ol>
+
+<h2>Configure Micro Services</h2>
+<br/ >
+<div class="row">
+	<div class="col-sm-3">
+    <a href="#">
+      <div class="tile-title tile-gray">
+        <div class="icon">
+          <i class="entypo entypo-newspaper"></i>
+        </div>
+        <div class="title">
+          <h3>Configure Micro Services</h3>
+          <p>Micro Service</p>
+        </div>
+      </div>
+    </a>
+	</div>
+	<div class="col-sm-3">
+    <a href="#">
+      <div class="tile-title tile-gray">
+        <div class="icon">
+          <i class="entypo entypo-picture"></i>
+        </div>
+        <div class="title">
+          <h3>Configure Images</h3>
+          <p>Micro service images </p>
+        </div>
+      </div>
+    </a>
+	</div>
+	<div class="col-sm-3">
+    <a href="{% url 'micro_service:registry_list' group_id=group.pk %}">
+      <div class="tile-title tile-gray">
+        <div class="icon">
+          <i class="entypo entypo-archive"></i>
+        </div>
+        <div class="title">
+          <h3>Configure Registries</h3>
+          <p>Micro service image repositories.</p>
+        </div>
+      </div>
+    </a>
+	</div>
+</div>
+<br />
+{% endblock %}

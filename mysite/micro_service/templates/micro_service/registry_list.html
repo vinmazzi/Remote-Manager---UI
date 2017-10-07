@@ -1,0 +1,434 @@
+{% extends 'group/header.html' %}
+{% load static %}
+{% block title %}
+Dashboard
+{% endblock %}
+{% block content %}
+    <script type="text/javascript">
+   function show_modal(registry_id){
+
+     jQuery('#modal-7').modal();
+
+     $.ajax({
+       url: "/mservices/"+ registry_id +"/edit",
+       contentType: "application/json; charset=utf-8",
+       success: function(response)
+       {
+         $("#modal_name").val(response.name)
+         $("#modal_description").val(response.description)
+         $("#modal_url").val(response.url)
+         $("#modal_port").val(response.port)
+         $("#modal_user").val(response.user)
+         $("#modal_password").val(response.password)
+         $("#modal_email").val(response.email)
+         $("#modal_ca_crt").val(response.ca_crt)
+         $("#modal_registry_edit").attr('action', '/mservices/'+response.id+'/edit')
+         if($("#modal_user").val()) {
+           $("#modal_authentication_collapse").show();
+           $("#modal_authentication").bootstrapSwitch('setState', true);
+         } else {
+           $("#modal_authentication").bootstrapSwitch('setState', false);
+           $("#modal_authentication_collapse").hide();
+         }
+         if($("#modal_ca_crt").val()){
+           $("#modal_insecure_collapse").show();
+           $("#modal_insecure").bootstrapSwitch('setState', true);
+         } else {
+           $("#modal_insecure_collapse").hide();
+           $("#modal_insecure").bootstrapSwitch('setState', false);
+         }
+       }
+     });
+   }
+$(document).ready(function(){
+  $("#modal_authentication").change(function(){
+    if($("#modal_authentication").bootstrapSwitch('status')){
+      $("#modal_user").attr("required", true);
+      $("#modal_password").attr("required", true);
+      $("#modal_email").attr("required", true);
+      $("#modal_authentication_collapse").show();
+    } else {
+      $("#modal_authentication_collapse").hide();
+      $("#modal_user").attr("required", false);
+      $("#modal_user").val("");
+      $("#modal_password").attr("required", false);
+      $("#modal_password").val("");
+      $("#modal_email").attr("required", false);
+      $("#modal_email").val("");
+    }
+  });
+
+  $("#modal_insecure").change(function(){
+    if($("#modal_insecure").bootstrapSwitch('status')){
+      $("#modal_ca_crt").attr("required", true);
+      $("#modal_insecure_collapse").show();
+    } else {
+      $("#modal_ca_crt").attr("required", false);
+      $("#modal_ca_crt").val("");
+      $("#modal_insecure_collapse").hide();
+    }
+  });
+
+  $("#authentication_collapse").hide();
+  
+  $("#authentication").change(function(){
+    $("#authentication_collapse").toggle();
+    if($("#authentication:checkbox:checked").length > 0){
+      $("#id_user").attr("required", true);
+      $("#id_password").attr("required", true);
+      $("#id_email").attr("required", true);
+    } else {
+      $("#id_user").attr("required", false);
+      $("#id_password").attr("required", false);
+      $("#id_email").attr("required", false);
+    }
+  });
+
+
+  $("#insecure_collapse").hide();
+  
+  $("#insecure").change(function(){
+    $("#insecure_collapse").toggle();
+    if($("#insecure:checkbox:checked").length > 0){
+      $("#id_ca_crt").attr("required", true);
+    } else {
+      $("#id_ca_crt").attr("required", false);
+    }
+  });
+});
+</script>
+           <script type="text/javascript">
+function send_or_edit (my_action, my_form) {
+
+  if (my_action == "delete") {
+    document.getElementById(my_form).action = "{% url 'micro_service:registry_delete' %}";
+    document.getElementById(my_form).submit();
+  }
+
+}
+         </script>
+<ol class="breadcrumb bc-3">
+   <li>
+     <a href="#"><i class="entypo-home"></i>Home</a>
+   </li>
+   <li>
+     <a href="#">Groups</a>
+   </li>
+   <li>
+     <a href="{% url 'group:list_config' %}">Configure Groups</a>
+   </li>
+   <li>
+     <a href="#">Micro Services</a>
+   </li>
+   <li class="active">
+     <strong>Registries</strong>
+   </li>
+</ol>
+<h2>Registries</h2>
+<br/ >
+<div class="row">
+  <div class="col-md-12">
+   <ul class="nav nav-tabs bordered"><!-- available classes "bordered", "right-aligned" -->
+         <li class="active">
+           <a href="#home" data-toggle="tab">
+             <span class="visible-xs"><i class="entypo-home"></i></span>
+             <span class="hidden-xs">Registry List</span>
+           </a>
+         </li>
+         <li>
+           <a href="#profile" data-toggle="tab">
+             <span class="visible-xs"><i class="entypo-user"></i></span>
+             <span class="hidden-xs">Add Registry</span>
+           </a>
+         </li>
+   </ul>
+       
+       <div class="tab-content">
+         <div class="tab-pane active" id="home">
+           
+             <table class="table table-bordered datatable" id="table-3">
+              <thead>
+                <tr>
+                  <th>
+                    <div class="checkbox checkbox-replace">
+                      <input type="checkbox" id="chk-1">
+                    </div>
+                  </th>
+                  <th>Registry Name</th>
+                  <th>Registry URL</th>
+                  <th>Registry Port</th>
+                  <th>Registry Description</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+               {% for registry in registries %} 
+               <form method="post" id="form-{{registry.pk}}">
+               {% csrf_token %}
+                <tr>
+                  <input type="hidden" name="registry_id" id="registry_id_{{registry.pk}}" value="{{registry.pk}}">
+                  <td>
+                    <div class="checkbox checkbox-replace">
+                      <input type="checkbox" name="registry_id" value="">
+                    </div>
+                  </td>
+                  <td>{{registry.name}}</td>
+                  <td>{{registry.url}}</td>
+                  <td>{{registry.port}}</td>
+                  <td>{{registry.description}}</td>
+                  <td>
+                    <a href="#" onclick="show_modal({{ registry.pk }});" class="btn btn-default btn-sm btn-icon icon-left"> <i class="entypo-pencil"></i> Edit </a>
+                    <a href="#" name="form-{{registry.pk}}" class="btn btn-danger btn-sm btn-icon icon-left" onclick="send_or_edit('delete', this.name);">
+
+                      <i class="entypo-cancel"></i>
+                      Delete
+
+                    </a>
+                  </td>
+                </tr>
+                </form>
+                {%endfor%}
+              </tbody>
+            </table>
+         </div>
+         <div class="tab-pane" id="profile">
+       <div class="panel panel-primary" data-collapsed="0">
+          <div class="panel-heading">
+            <div class="panel-title">
+              Add New Registry
+            </div>
+          </div>
+            <div class="panel-body">
+              <form role="form" class="form-horizontal form-groups-bordered" method="post" action="#">
+                {% csrf_token %}
+                <div class="form-group">
+                  <label for="field-1" class="col-sm-3 control-label">{{ form.name.label_tag }}</label>
+                  <div class="col-sm-3">
+                    {{ form.name }}
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="field-1" class="col-sm-3 control-label">{{ form.url.label_tag }}</label>
+                  <div class="col-sm-2">
+                    {{ form.url }}
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="field-1" class="col-sm-3 control-label">{{ form.port.label_tag }}</label>
+                  <div class="col-sm-1">
+                    {{ form.port }}
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="field-1" class="col-sm-3 control-label">Use Authentication: </label>
+                  <div class="col-sm-3">
+                    <div class="make-switch switch-small">
+                        <input id="authentication" type="checkbox" value="on"/>
+                    </div>
+                  </div>
+                </div>
+                <div id="authentication_collapse">
+  
+                  </br>
+                  <div class="form-group">
+                    <label for="field-1" class="col-sm-3 control-label">{{ form.user.label_tag }}</label>
+
+                    <div class="col-sm-2">
+                      {{ form.user }}
+                    </div>
+                  </div>
+
+                  <hr/>
+                  <div class="form-group">
+                    <label for="field-1" class="col-sm-3 control-label">{{ form.password.label_tag }}</label>
+
+                    <div class="col-sm-2">
+                      {{ form.password }}
+                    </div>
+                  </div>
+
+                  <hr/>
+                  <div class="form-group">
+                    <label for="field-1" class="col-sm-3 control-label">{{ form.email.label_tag }}</label>
+
+                    <div class="col-sm-2">
+                      {{ form.email }}
+                    </div>
+                  </div>
+
+                <hr/>
+                </div>
+                <div class="form-group">
+                  <label for="field-1" class="col-sm-3 control-label">Insecure Registry: </label>
+                  <div class="col-sm-2">
+                    <div class="make-switch switch-small">
+                        <input id="insecure" type="checkbox" value="on"/>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="insecure_collapse">
+                  </br>
+                  <div class="form-group">
+                    <label for="field-1" class="col-sm-3 control-label">{{ form.ca_crt.label_tag }}</label>
+
+                    <div class="col-sm-2">
+                      {{ form.ca_crt }}
+                    </div>
+                  </div>
+
+                  <hr/>
+                </div>
+
+                <div class="form-group">
+                  <label for="field-1" class="col-sm-3 control-label">{{ form.description.label_tag }}</label>
+
+                  <div class="col-sm-3">
+                    {{ form.description }}
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="col-sm-offset-3 col-sm-5">
+                    <button type="submit" class="btn btn-default">Submit</button>
+                  </div>
+                </div>
+              </form>
+          </div>
+        </div>
+       </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block bottom_includes %}
+
+  <link rel="stylesheet" href="{% static 'assets/js/datatables/responsive/css/datatables.responsive.css'%}">
+  <link rel="stylesheet" href="{% static 'assets/js/select2/select2-bootstrap.css'%}">
+  <link rel="stylesheet" href="{% static 'assets/js/select2/select2.css'%}">
+  <script src="{% static 'assets/js/gsap/main-gsap.js'%}"></script>
+  <script src="{% static 'assets/js/jquery-ui/js/jquery-ui-1.10.3.minimal.min.js'%}"></script>
+  <script src="{% static 'assets/js/bootstrap.js'%}"></script>
+  <script src="{% static 'assets/js/joinable.js'%}"></script>
+  <script src="{% static 'assets/js/resizeable.js'%}"></script>
+  <script src="{% static 'assets/js/neon-api.js'%}"></script>
+  <script src="{% static 'assets/js/jquery.dataTables.min.js'%}"></script>
+  <script src="{% static 'assets/js/datatables/TableTools.min.js'%}"></script>
+  <script src="{% static 'assets/js/dataTables.bootstrap.js'%}"></script>
+  <script src="{% static 'assets/js/datatables/jquery.dataTables.columnFilter.js'%}"></script>
+  <script src="{% static 'assets/js/datatables/lodash.min.js'%}"></script>
+  <script src="{% static 'assets/js/datatables/responsive/js/datatables.responsive.js'%}"></script>
+  <script src="{% static 'assets/js/select2/select2.min.js'%}"></script>
+  <script src="{% static 'assets/js/neon-chat.js'%}"></script>
+  <script src="{% static 'assets/js/neon-custom.js'%}"></script>
+  <script src="{% static 'assets/js/neon-demo.js'%}"></script>
+  <script src="{% static 'assets/js/bootstrap-switch.min.js'%}"></script>
+{% endblock %}
+
+{% block modals %}
+<div class="modal fade" id="modal-7">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Edit Network</h4>
+      </div>
+      <div class="modal-body">
+        <form name="modal_registry_edit" id="modal_registry_edit" class="form-horizontal form-groups-bordered" method="post" action="#">
+        {% csrf_token %}
+         <div class="form-group">
+           <label for="field-1" class="col-sm-3 control-label">Name: </label>
+           <div class="col-sm-5">
+             <input type="text" name="modal_name" id="modal_name" class="form-control" />
+           </div>
+         </div>
+         <div class="form-group">
+           <label for="field-1" class="col-sm-3 control-label">Url: </label>
+           <div class="col-sm-5">
+             <input type="text" name="modal_url" id="modal_url" class="form-control" />
+           </div>
+         </div>
+         <div class="form-group">
+           <label for="field-1" class="col-sm-3 control-label">Port: </label>
+           <div class="col-sm-3">
+             <input type="text"  name="modal_port" id="modal_port" class="form-control" />
+           </div>
+         </div>
+         <div class="form-group">
+           <label for="field-1" class="col-sm-3 control-label">Use Authentication: </label>
+           <div class="col-sm-3">
+             <div id="modal_authentication" class="make-switch switch-small" >
+                 <input  type="checkbox" value="on" />
+               </div>
+           </div>
+         </div>
+         <div id="modal_authentication_collapse">
+  
+           </br>
+           <div class="form-group">
+             <label for="field-1" class="col-sm-3 control-label">User: </label>
+
+             <div class="col-sm-4">
+               <input type="text"  name="modal_user" id="modal_user" class="form-control" />
+             </div>
+           </div>
+
+           <hr/>
+           <div class="form-group">
+             <label for="field-1" class="col-sm-3 control-label">Password: </label>
+
+             <div class="col-sm-4">
+               <input type="password" name="modal_password" id="modal_password" class="form-control" />
+             </div>
+           </div>
+
+           <hr/>
+           <div class="form-group">
+             <label for="field-1" class="col-sm-3 control-label">Email: </label>
+
+             <div class="col-sm-4">
+               <input type="text" name="modal_email" id="modal_email" class="form-control" />
+             </div>
+           </div>
+
+         <hr/>
+         </div>
+         <div class="form-group">
+           <label for="field-1" class="col-sm-3 control-label">Insecure Registry: </label>
+           <div class="col-sm-2">
+             <div id="modal_insecure" class="make-switch switch-small">
+                 <input  type="checkbox" value="on"/>
+             </div>
+           </div>
+         </div>
+
+         <div id="modal_insecure_collapse">
+           </br>
+           <div class="form-group">
+             <label for="field-1" class="col-sm-3 control-label">CA Certificate: </label>
+
+             <div class="col-sm-2">
+               <textarea name="modal_ca_crt" id="modal_ca_crt" class="form-control " style="height: 150px; width: 350px; overflow: scroll; word-wrap: break-word; resize: horizontal;"></textarea>
+             </div>
+           </div>
+
+           <hr/>
+         </div>
+
+         <div class="form-group">
+           <label for="field-1" class="col-sm-3 control-label">Description: </label>
+
+           <div class="col-sm-3">
+             <textarea name="modal_description" id="modal_description" class="form-control " style="height: 75px; width: 350px; overflow: scroll; word-wrap: break-word; resize: horizontal;"></textarea>
+           </div>
+         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-blue" >Save Changes</button>
+      </div>
+    </div>
+    </form>
+   </div>
+</div>
+{% endblock %}

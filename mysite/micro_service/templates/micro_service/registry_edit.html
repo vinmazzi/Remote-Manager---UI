@@ -1,0 +1,91 @@
+ <div class="panel-body">
+    <form role="form" class="form-horizontal form-groups-bordered" method="post" action="#">
+      {% csrf_token %}
+         <div class="form-group">
+           <label for="field-1" class="col-sm-3 control-label">{{ form.name.label_tag }}</label>
+           <div class="col-sm-3">
+             {{ form.name }}
+           </div>
+         </div>
+         <div class="form-group">
+           <label for="field-1" class="col-sm-3 control-label">{{ form.url.label_tag }}</label>
+           <div class="col-sm-2">
+             {{ form.url }}
+           </div>
+         </div>
+         <div class="form-group">
+           <label for="field-1" class="col-sm-3 control-label">{{ form.port.label_tag }}</label>
+           <div class="col-sm-1">
+             {{ form.port }}
+           </div>
+         </div>
+         <div class="form-group">
+           <label for="field-1" class="col-sm-3 control-label">Use Authentication: </label>
+           <div class="col-sm-3">
+             <div class="make-switch switch-small">
+                 <input id="authentication" type="checkbox" value="on"/>
+             </div>
+           </div>
+         </div>
+         <div id="authentication_collapse">
+  
+           </br>
+           <div class="form-group">
+             <label for="field-1" class="col-sm-3 control-label">{{ form.user.label_tag }}</label>
+
+             <div class="col-sm-2">
+               {{ form.user }}
+             </div>
+           </div>
+
+           <hr/>
+           <div class="form-group">
+             <label for="field-1" class="col-sm-3 control-label">{{ form.password.label_tag }}</label>
+
+             <div class="col-sm-2">
+               {{ form.password }}
+             </div>
+           </div>
+
+           <hr/>
+           <div class="form-group">
+             <label for="field-1" class="col-sm-3 control-label">{{ form.email.label_tag }}</label>
+
+             <div class="col-sm-2">
+               {{ form.email }}
+             </div>
+           </div>
+
+         <hr/>
+         </div>
+         <div class="form-group">
+           <label for="field-1" class="col-sm-3 control-label">Insecure Registry: </label>
+           <div class="col-sm-2">
+             <div class="make-switch switch-small">
+                 <input id="insecure" type="checkbox" value="on"/>
+             </div>
+           </div>
+         </div>
+
+         <div id="insecure_collapse">
+           </br>
+           <div class="form-group">
+             <label for="field-1" class="col-sm-3 control-label">{{ form.ca_crt.label_tag }}</label>
+
+             <div class="col-sm-2">
+               {{ form.ca_crt }}
+             </div>
+           </div>
+
+           <hr/>
+         </div>
+
+         <div class="form-group">
+           <label for="field-1" class="col-sm-3 control-label">{{ form.description.label_tag }}</label>
+
+           <div class="col-sm-3">
+             {{ form.description }}
+           </div>
+         </div>
+    </form>
+</div>
