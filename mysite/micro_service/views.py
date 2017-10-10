@@ -5,7 +5,7 @@ from group.models import Group
 from mysite.utils import Utils
 from django.forms.models import model_to_dict
 import urllib.request, urllib, json, ast
-from .models import Registry, Container_catalog
+from .models import Registry, Container_catalog, Container
 from network.models import Network
 from .forms import RegistryForm, ContainerCatalogForm
 
@@ -14,6 +14,33 @@ def options(request, group_id):
     return render(request, 'micro_service/micro_service_options.html', {
                     'group': group,
                     })
+
+def container_redis_format(containers):
+    host_containers = {}
+    if containers:
+        for container in containers:
+            node = container.node_fk
+            if node not in host_containers.keys():
+                host_containers[node] = {'redis_key': "{}:{}:containers".format(node.client_fk.client_name, node.name)}
+            network_name = container.container_catalog_fk.network_fk.network_name
+            network_ip = container.ipaddress
+            image_name = container.container_catalog_fk.image_name
+            container_name = container.container_catalog_fk.name.replace(" ", "_")
+            registry = "{}:{}".format(container.container_catalog_fk.registry_fk.url, container.container_catalog_fk.registry_fk.port)
+            container_hash_tmp = {container_name: {'primitive_class': 'ocf',
+                    'provided_by': 'heartbeat',
+                    'primitive_type': 'docker', 
+                    'parameters': {
+                         'image': "%s/%s:latest" %(registry,image_name),
+                         'name': container_name,
+                         'run_opts': "--network %s --ip %s" %(network_name, network_ip),
+                        }}}
+            host_containers[node].update(container_hash_tmp)
+    for key in host_containers.keys():
+        redis_key = host_containers[key]['redis_key']
+        host_containers[key].pop('redis_key')
+        redis_value = json.dumps(host_containers[key])
+        Utils.redis_write(redis_key, redis_value)
 
 def registry_redis_format(registries):
     registry_hash = {}
@@ -134,6 +161,7 @@ def catalog_list(request, group_id):
                                 container_catalog_fk = container_catalog,
                                 ipaddress = container_ip,
                             )
+            container_redis_format(Container.objects.all())
             return HttpResponseRedirect(reverse('micro_service:catalog_list', kwargs={'group_id':group.pk}))
     form = ContainerCatalogForm()
     for field in form.fields:
@@ -166,5 +194,6 @@ def catalog_container_delete(request):
     container = Container_catalog.objects.get(pk=request.POST.get('container_id'))
     group = container.group_fk
     container.delete()
+    container_redis_format(Container.objects.all())
 
     return HttpResponseRedirect(reverse('micro_service:catalog_list', kwargs={'group_id':group.pk}))
