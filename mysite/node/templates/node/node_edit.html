@@ -85,6 +85,17 @@ Dashboard
       </div>
     </div>
     <script type="text/javascript">
+       $(document).ready(function(){
+         
+         $ip = $('#Vendas_ip').val().split("."); 
+         $("#teste_ip").val($ip['0'] + "." + $ip['1'] + "." + $ip['2'] + ".255");
+
+         $("#Vendas_ip").change(function(){
+           $ip = $('#Vendas_ip').val().split("."); 
+           $("#teste_ip").val($ip['0'] + "." + $ip['1'] + "." + $ip['2'] + ".255");
+         });
+        
+       });
        function show_modal(interface_id){
     
          jQuery('#modal-7').modal('show', {backdrop: 'static'});
@@ -169,7 +180,7 @@ Dashboard
             <div class="form-group">
               <label for="field-1" class="col-sm-3 control-label">{{ interface.network_fk.network_name}} Ip: </label>
               <div class="col-sm-5">
-                <input type="text" class="form-control" name="{{interface.network_fk.network_name}}_ip" value="{{interface.ipaddress}}" />
+                <input type="text" class="form-control" id="{{interface.network_fk.network_name}}_ip" name="{{interface.network_fk.network_name}}_ip" value="{{interface.ipaddress}}" />
               </div>
             </div>
             <hr/>
@@ -243,6 +254,77 @@ Dashboard
       </div>
           {% endif %}
           {% endfor %}
+   {% if node.container_set.all %}
+    {% for container in node.container_set.all %}
+   <div class="panel panel-primary" data-collapsed="0">
+    <div class="panel-heading">
+      <div class="panel-title">
+        Container {{ container.container_catalog_fk.name }}
+      </div>
+    </div>
+      <div class="panel-body">
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">Image Name: </label>
+  
+            <div class="col-sm-3">
+              <input type="text" class="form-control" name="{{container.container_catalog_fk.name}}_image_name" value="{{container.container_catalog_fk.image_name}}" readonly />
+            </div>
+          </div>
+          <hr/>
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">Registry: </label>
+  
+            <div class="col-sm-3">
+              <input type="text" class="form-control" name="{{container.container_catalog_fk.name}}_registry" value="{{container.container_catalog_fk.registry_fk.url}}:{{container.container_catalog_fk.registry_fk.port}}" readonly />
+            </div>
+          </div>
+          <hr/>
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">Ip Address: </label>
+  
+            <div class="col-sm-3">
+              <input type="text" class="form-control" name="{{container.name}}_ip_address" value="{{container.ipaddress}}" readonly />
+            </div>
+          </div>
+      </div>
+    </div>
+    {% endfor %}
+   {% else %}
+   {% for container in group.container_catalog_set.all %}
+   <div class="panel panel-primary" data-collapsed="0">
+    <div class="panel-heading">
+      <div class="panel-title">
+        Container {{ container.name }}
+      </div>
+    </div>
+      <div class="panel-body">
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">Image Name: </label>
+  
+            <div class="col-sm-3">
+              <input type="text" class="form-control" name="{{container.name}}_name" value="{{container.image_name}}" readonly />
+            </div>
+          </div>
+          <hr/>
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">Registry: </label>
+  
+            <div class="col-sm-3">
+              <input type="text" class="form-control" name="{{container.name}}_registry" value="{{container.registry_fk.url}}:{{container.registry_fk.port}}" readonly />
+            </div>
+          </div>
+          <hr/>
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">Ip Address: </label>
+  
+            <div class="col-sm-5">
+              <input type="text" class="form-control" name="{{container.name}}_ip_address" value="{{container.ipaddress}}" readonly />
+            </div>
+          </div>
+      </div>
+    </div>
+   {% endfor %}
+   {% endif %}
         <div class="form-group">
           <div class="col-sm-offset-3 col-sm-5">
             <button type="submit" class="btn btn-default">Submit</button>

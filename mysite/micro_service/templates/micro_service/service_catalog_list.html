@@ -1,0 +1,294 @@
+{% extends 'group/header.html' %}
+{% load static %}
+{% block title %}
+Dashboard
+{% endblock %}
+{% block content %}
+<script type="text/javascript">
+function show_modal(registry_id){
+     jQuery('#modal-7').modal();
+
+     $.ajax({
+       url: "/mservices/"+ registry_id +"/container_edit",
+       contentType: "application/json; charset=utf-8",
+       success: function(response)
+       {
+         $("#modal_container_name").val(response.name);
+         $("#modal_container_description").val(response.description);
+         $("#modal_container_image_name").val(response.image_name);
+         $("#modal_registry_edit").attr('action', '/mservices/'+ response.id +'/container_edit');
+         $("#modal_network").val(response.network_fk);
+         $("#modal_network").select2();
+         $("#modal_registry").val(response.registry_fk);
+         $("#modal_registry").select2();
+         $("#modal_container_host_octect").val(response.host_octect);
+         $("#modal_container_host_octect").select2();
+       }
+     });
+}
+</script>
+           <script type="text/javascript">
+function send_or_edit (my_action, my_form) {
+
+  if (my_action == "delete") {
+    document.getElementById(my_form).action = "{% url 'micro_service:catalog_delete' %}";
+    document.getElementById(my_form).submit();
+  }
+
+}
+         </script>
+<ol class="breadcrumb bc-3">
+   <li>
+     <a href="#"><i class="entypo-home"></i>Home</a>
+   </li>
+   <li>
+     <a href="#">Groups</a>
+   </li>
+   <li>
+     <a href="{% url 'group:list_config' %}">Configure Groups</a>
+   </li>
+   <li>
+     <a href="#">Containers</a>
+   </li>
+   <li class="active">
+     <strong>Configure Containers Catalog</strong>
+   </li>
+</ol>
+<h2>Containers in Catalog</h2>
+<br/ >
+<div class="row">
+  <div class="col-md-12">
+   <ul class="nav nav-tabs bordered"><!-- available classes "bordered", "right-aligned" -->
+         <li class="active">
+           <a href="#home" data-toggle="tab">
+             <span class="visible-xs"><i class="entypo-home"></i></span>
+             <span class="hidden-xs">Container List</span>
+           </a>
+         </li>
+         <li>
+           <a href="#profile" data-toggle="tab">
+             <span class="visible-xs"><i class="entypo-user"></i></span>
+             <span class="hidden-xs">Add Container</span>
+           </a>
+         </li>
+   </ul>
+       
+       <div class="tab-content">
+         <div class="tab-pane active" id="home">
+           
+             <table class="table table-bordered datatable" id="table-3">
+              <thead>
+                <tr>
+                  <th>
+                    <div class="checkbox checkbox-replace">
+                      <input type="checkbox" id="chk-1">
+                    </div>
+                  </th>
+                  <th>Container Name</th>
+                  <th>Container Image Name</th>
+                  <th>Container Network</th>
+                  <th>Container Description</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+               {% for container in catalog %} 
+               <form method="post" id="form-{{container.pk}}">
+               {% csrf_token %}
+                <tr>
+                  <input type="hidden" name="container_id" id="container_id_{{container.pk}}" value="{{container.pk}}">
+                  <td>
+                    <div class="checkbox checkbox-replace">
+                      <input type="checkbox" name="container_id" value="">
+                    </div>
+                  </td>
+                  <td>{{container.name}}</td>
+                  <td>{{container.image_name}}</td>
+                  <td>{{container.network_fk.network_name}}</td>
+                  <td>{{container.description}}</td>
+                  <td>
+                    <a href="#" onclick="show_modal({{ container.pk }});" class="btn btn-default btn-sm btn-icon icon-left"> <i class="entypo-pencil"></i> Edit </a>
+                    <a href="#" name="form-{{container.pk}}" class="btn btn-danger btn-sm btn-icon icon-left" onclick="send_or_edit('delete', this.name);">
+
+                      <i class="entypo-cancel"></i>
+                      Delete
+
+                    </a>
+                  </td>
+                </tr>
+                </form>
+                {%endfor%}
+              </tbody>
+            </table>
+         </div>
+         <div class="tab-pane" id="profile">
+       <div class="panel panel-primary" data-collapsed="0">
+          <div class="panel-heading">
+            <div class="panel-title">
+              Add New Container to Catalog
+            </div>
+          </div>
+            <div class="panel-body">
+              <form role="form" class="form-horizontal form-groups-bordered" method="post" action="#">
+                {% csrf_token %}
+                <div class="form-group">
+                  <label for="field-1" class="col-sm-3 control-label">{{ form.name.label_tag }}</label>
+                  <div class="col-sm-3">
+                    {{ form.name }}
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="field-1" class="col-sm-3 control-label">{{ form.image_name.label_tag }}</label>
+                  <div class="col-sm-3">
+                    {{ form.image_name }}
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="field-1" class="col-sm-3 control-label">Container Network: </label>
+                  <div class="col-sm-3">
+                    <select name="network" required="true" id="network" class="select2" data-allow-clear="true" data-placeholder="Network">
+                    <option></option>
+                    {% for network in networks %}
+                    <option value="{{network.pk}}">{{network.network_name}}</option>
+                    {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="field-1" class="col-sm-3 control-label">Container Ip octect: </label>
+                  <div class="col-sm-2">
+                    <select name="host_octect" required="true" id="host_octect" class="select2" data-allow-clear="true" data-placeholder="Octects">
+                    <option></option>
+                    {% for host_octect in host_octect_list %}
+                    <option value="{{host_octect}}">X.Y.Z.{{host_octect}}</option>
+                    {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="field-1" class="col-sm-3 control-label">Registry: </label>
+                  <div class="col-sm-3">
+                    <select name="registry" required="true" id="registry" class="select2" data-allow-clear="true" data-placeholder="Registry">
+                    <option></option>
+                    {% for registry in registries %}
+                    <option value="{{registry.pk}}">{{registry.name}}</option>
+                    {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="field-1" class="col-sm-3 control-label">{{ form.description.label_tag }}</label>
+                  <div class="col-sm-3">
+                    {{ form.description }}
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="col-sm-offset-3 col-sm-5">
+                    <button type="submit" class="btn btn-default">Submit</button>
+                  </div>
+                </div>
+              </form>
+          </div>
+        </div>
+       </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block bottom_includes %}
+
+  <link rel="stylesheet" href="{% static 'assets/js/datatables/responsive/css/datatables.responsive.css'%}">
+  <link rel="stylesheet" href="{% static 'assets/js/select2/select2-bootstrap.css'%}">
+  <link rel="stylesheet" href="{% static 'assets/js/select2/select2.css'%}">
+  <script src="{% static 'assets/js/gsap/main-gsap.js'%}"></script>
+  <script src="{% static 'assets/js/jquery-ui/js/jquery-ui-1.10.3.minimal.min.js'%}"></script>
+  <script src="{% static 'assets/js/bootstrap.js'%}"></script>
+  <script src="{% static 'assets/js/joinable.js'%}"></script>
+  <script src="{% static 'assets/js/resizeable.js'%}"></script>
+  <script src="{% static 'assets/js/neon-api.js'%}"></script>
+  <script src="{% static 'assets/js/jquery.dataTables.min.js'%}"></script>
+  <script src="{% static 'assets/js/datatables/TableTools.min.js'%}"></script>
+  <script src="{% static 'assets/js/dataTables.bootstrap.js'%}"></script>
+  <script src="{% static 'assets/js/datatables/jquery.dataTables.columnFilter.js'%}"></script>
+  <script src="{% static 'assets/js/datatables/lodash.min.js'%}"></script>
+  <script src="{% static 'assets/js/datatables/responsive/js/datatables.responsive.js'%}"></script>
+  <script src="{% static 'assets/js/select2/select2.min.js'%}"></script>
+  <script src="{% static 'assets/js/neon-chat.js'%}"></script>
+  <script src="{% static 'assets/js/neon-custom.js'%}"></script>
+  <script src="{% static 'assets/js/neon-demo.js'%}"></script>
+  <script src="{% static 'assets/js/bootstrap-switch.min.js'%}"></script>
+{% endblock %}
+
+{% block modals %}
+<div class="modal fade" id="modal-7">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Edit Network</h4>
+      </div>
+      <div class="modal-body">
+        <form name="modal_registry_edit" id="modal_registry_edit" class="form-horizontal form-groups-bordered" method="post" action="#">
+        {% csrf_token %}
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">Name: </label>
+            <div class="col-sm-4">
+              <input type="text" id="modal_container_name" name="modal_container_name" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">Image Name: </label>
+            <div class="col-sm-4">
+              <input type="text" id="modal_container_image_name" name="modal_container_image_name" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">Container Network: </label>
+            <div class="col-sm-5">
+              <select name="modal_network" required="true" id="modal_network" class="select2" data-allow-clear="true" data-placeholder="Network">
+              <option></option>
+              {% for network in networks %}
+              <option id="modal_network_{{network.pk}}" value="{{network.pk}}">{{network.network_name}}</option>
+              {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">Container Ip octect: </label>
+            <div class="col-sm-4">
+              <select name="modal_container_host_octect" required="true" id="modal_container_host_octect" class="select2" data-allow-clear="true" data-placeholder="Octects">
+              <option></option>
+              {% for host_octect in host_octect_list %}
+              <option value="{{host_octect}}">X.Y.Z.{{host_octect}}</option>
+              {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">Registry: </label>
+            <div class="col-sm-5">
+              <select name="modal_registry" required="true" id="modal_registry" class="select2" data-allow-clear="true" data-placeholder="Registry">
+              <option></option>
+              {% for registry in registries %}
+              <option id="modal_registry_{{registry.pk}}" value="{{registry.pk}}">{{registry.name}}</option>
+              {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">Description: </label>
+            <div class="col-sm-3">
+              <textarea name="modal_container_description" id="modal_container_description" class="form-control" style="height: 75px; width: 182px; overflow: scroll; word-wrap: break-word; resize: horizontal;"></textarea>
+            </div>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-blue" >Save Changes</button>
+      </div>
+    </div>
+    </form>
+   </div>
+</div>
+{% endblock %}

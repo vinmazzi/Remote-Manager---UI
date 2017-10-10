@@ -14,7 +14,8 @@ class ImageForm(forms.Form):
     name = forms.CharField(label="Name", max_length=20)
     description = forms.CharField(label="Description", max_length=100, widget=forms.Textarea())
 
-class MicroServiceForm(forms.Form):
+class ContainerCatalogForm(forms.Form):
     name = forms.CharField(label="Name", max_length=20)
-    description = forms.CharField(label="Name", max_length=100, widget=forms.Textarea())
-    ipaddress  = forms.CharField(label="Ip Address", max_length=17)
+    description = forms.CharField(label="Description", max_length=100, widget=forms.Textarea())
+    image_name  = forms.CharField(label="Image Name", max_length=100)
+    host_octect  = forms.CharField(label="Host Ip octect", max_length=3)

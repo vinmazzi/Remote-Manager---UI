@@ -267,5 +267,7 @@ def node_edit(request, node_id):
             'form': nodeForm,
             'interfaceForm': interfaceForm,
             'interface_set': interface_set,
-            'client_id': client_id
+            'client_id': client_id,
+            'group': node.group_fk,
+            'ip_teste': '33'
         })

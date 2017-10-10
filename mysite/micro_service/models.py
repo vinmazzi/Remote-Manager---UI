@@ -1,6 +1,7 @@
 from django.db import models
 from group.models import Group
 from network.models import Network
+from node.models import Node
 
 class Registry(models.Model):
     name = models.CharField(max_length=20)
@@ -25,14 +26,22 @@ class Image(models.Model):
     def __str__(self):
         return self.name
 
-class Micro_service(models.Model):
+class Container_catalog(models.Model):
     name = models.CharField(max_length=20)
     description = models.CharField(max_length=100, default="N/A")
-    ipaddress  = models.CharField(max_length=17, default="N/A")
     group_fk   = models.ForeignKey(Group, on_delete=models.CASCADE, default=0)
     network_fk = models.ForeignKey(Network, on_delete=models.CASCADE, default=0)
-    image_fk = models.ForeignKey(Image, on_delete=models.CASCADE, default=0)
+    image_name = models.CharField(max_length=100, default="N/A") 
+    host_octect = models.CharField(max_length=3, default="N/A")
+    registry_fk   = models.ForeignKey(Registry, on_delete=models.CASCADE, default=0)
 
     def __str__(self):
         return self.name
 
+class Container(models.Model):
+    container_catalog_fk = models.ForeignKey(Container_catalog, on_delete=models.CASCADE, default=0)
+    ipaddress = models.CharField(max_length=20, default="N/A")
+    node_fk = models.ForeignKey(Node, on_delete=models.CASCADE, default=0)
+
+    def __str__(self):
+        return self.container_catalog_fk.name

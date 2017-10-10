@@ -5,8 +5,9 @@ from group.models import Group
 from mysite.utils import Utils
 from django.forms.models import model_to_dict
 import urllib.request, urllib, json, ast
-from .models import Registry
-from .forms import RegistryForm
+from .models import Registry, Container_catalog
+from network.models import Network
+from .forms import RegistryForm, ContainerCatalogForm
 
 def options(request, group_id):
     group = Group.objects.get(pk=group_id)
@@ -104,3 +105,66 @@ def registry_list(request, group_id):
             'registries': registries,
             'form': form,
         })
+
+def catalog_list(request, group_id):
+    group = Group.objects.get(pk=group_id)
+    catalog = group.container_catalog_set.all()
+    registries = group.registry_set.all()
+    networks = group.network_set.filter(network_bridge=True)
+    host_octect_list = list(range(2,255))
+    for container in catalog:
+        if container.host_octect in host_octect_list: host_octect_list.remove(container.host_octect)
+    if request.method == 'POST':
+        form = ContainerCatalogForm(request.POST)
+        if form.is_valid():
+            container_catalog = group.container_catalog_set.create(
+                       name = form.cleaned_data['name'], 
+                       description = form.cleaned_data['description'], 
+                       image_name = form.cleaned_data['image_name'], 
+                       network_fk = group.network_set.get(pk=request.POST.get('network')),
+                       registry_fk = group.registry_set.get(pk=request.POST.get('registry')), 
+                       host_octect = request.POST.get('host_octect'),
+                    )
+            for node in group.node_set.all():
+                if node.interface_set.filter(network_fk=container_catalog.network_fk):
+                    host_ipaddress = node.interface_set.filter(network_fk=container_catalog.network_fk)[0].ipaddress
+                    network_tmp = host_ipaddress.split(".")
+                    container_ip = "{}.{}.{}.{}".format(network_tmp[0], network_tmp[1], network_tmp[2],container_catalog.host_octect)
+                    node.container_set.create(
+                                container_catalog_fk = container_catalog,
+                                ipaddress = container_ip,
+                            )
+            return HttpResponseRedirect(reverse('micro_service:catalog_list', kwargs={'group_id':group.pk}))
+    form = ContainerCatalogForm()
+    for field in form.fields:
+        form.fields[field].widget.__dict__['attrs'].update({'class': 'form-control'})
+        if (field == 'description' or field == 'ca_crt'):
+            form.fields[field].widget.__dict__['attrs'].update({'class': 'form-control autogrow'})
+            form.fields[field].widget.__dict__['attrs'].update({'style': 'height: 50px'})
+    return render(request, 'micro_service/service_catalog_list.html', {
+            'form': form,
+            'registries': registries,
+            'networks': networks,
+            'catalog': catalog,
+            'host_octect_list': host_octect_list,
+        })
+
+def container_edit(request, container_id):
+    container = Container_catalog.objects.get(pk=container_id)
+    if request.method == "POST":
+        container.name = request.POST.get('modal_container_name')
+        container.description = request.POST.get('modal_container_description')
+        container.image_name = request.POST.get('modal_container_image_name')
+        container.network_fk = Network.objects.get(pk=request.POST.get('modal_network'))
+        container.registry_fk = Registry.objects.get(pk=request.POST.get('modal_registry'))
+        container.save()
+        return HttpResponseRedirect(reverse('micro_service:catalog_list', kwargs={'group_id':container.group_fk.pk}))
+
+    return HttpResponse(json.dumps(model_to_dict(container)), content_type="application/json")
+
+def catalog_container_delete(request):
+    container = Container_catalog.objects.get(pk=request.POST.get('container_id'))
+    group = container.group_fk
+    container.delete()
+
+    return HttpResponseRedirect(reverse('micro_service:catalog_list', kwargs={'group_id':group.pk}))
