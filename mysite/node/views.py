@@ -6,12 +6,38 @@ from client.models import Client
 from store.models import Store
 from .models import Node
 from .forms import NodeForm
+from route.models import Route
 from network.forms import InterfaceForm
 from django.forms.models import model_to_dict
 import urllib.request, urllib, json, ast
 from mysite.utils import Utils
+from micro_service.models import Container
 
 # Create your views here.
+
+def redis_route_format(routes):
+    routes_hash = {}
+    for route in routes:
+        dict_r = model_to_dict(route)
+        pop_keys = ['id', 'interface_fk']
+        iface = route.interface_fk
+        if iface.bridge:
+            tmp_interface_name = iface.network_fk.network_interface
+            iface_name = "br%s" %(list(filter(str.isdigit,tmp_interface_name))[0])
+        else:
+            iface_name = iface.network_fk.network_interface
+
+        dict_r.update({'interface': iface_name})
+        if route.network == 'default':
+            route_name = route.network
+
+        for key in pop_keys:
+            dict_r.pop(key)
+        
+        tmp_format = ast.literal_eval("{\'%s\': %s}" %(route_name, dict_r))
+        routes_hash.update(tmp_format)
+
+    return json.dumps(routes_hash)
 
 def interface_redis_format(interfaces):
    interfaces_hash = {}
@@ -20,20 +46,28 @@ def interface_redis_format(interfaces):
        pop_keys = ['bridge','node_fk', 'network_fk', 'id', 'gateway']
        tmp_interface_name = i.network_fk.network_interface
 
+       if i.node_fk.group_fk.dnsclient_set.all():
+           iface_options = {'options': {'PEERDNS': 'no'}}
+           dict_i.update(iface_options)
+
        for key,value in dict_i.items():
            if (not value) and (key not in pop_keys):
                pop_keys.append(key)
 
        for key in pop_keys:
            dict_i.pop(key)
+
        tmp_format = ast.literal_eval("{\'%s\': %s}" %(tmp_interface_name, dict_i))
 
        if i.bridge:
            for key in ['ipaddress', 'netmask']: 
                tmp_format[tmp_interface_name].pop(key)
            bridge_name = "br%s" %(list(filter(str.isdigit,tmp_interface_name))[0])
-           tmp_format[tmp_interface_name].update({'options': {'BRIDGE': bridge_name}})
-           bridge_hash = {bridge_name: {'method': 'static', 'options': {'TYPE': 'bridge'}, 'ipaddress': i.ipaddress,'netmask': i.netmask}}
+           if 'options' in tmp_format[tmp_interface_name]:
+               tmp_format[tmp_interface_name]['options'].update({'BRIDGE': bridge_name})
+           else:
+               tmp_format[tmp_interface_name].update({'options': {'BRIDGE': bridge_name}})
+           bridge_hash = {bridge_name: {'method': 'static', 'options': {'TYPE': 'Bridge'}, 'ipaddress': i.ipaddress,'netmask': i.netmask}}
            tmp_format.update(bridge_hash)
        interfaces_hash.update(tmp_format)
 
@@ -100,10 +134,6 @@ def node_create(request, store_id):
                         client_fk = store.client_fk,
                         group_fk = store.group_fk,
                         store_fk = store,
-                        dns1_ip = form.cleaned_data['dns1_ip'],
-                        dns2_ip = form.cleaned_data['dns2_ip'],
-                        dns_domain = form.cleaned_data['dns_domain'],
-                        dns_search = form.cleaned_data['dns_domain'],
                     )
             key_name = "{}:{}:group".format(node.client_fk.client_name,node.name)
             key_value = store.group_fk.group_name
@@ -115,14 +145,23 @@ def node_create(request, store_id):
                 gateway_value = request.POST.get("{}_gateway".format(network.network_name))
                 bridge = network.network_bridge
                 if network.network_interface not in str(node.interface_set.all()):
-                    node.interface_set.create(
+                    iface = node.interface_set.create(
                               method = method_value,
                               ipaddress = ip_value,
-                              bridge = brdige,
+                              bridge = bridge,
                               netmask = netmask_value,
                               gateway = gateway_value,
                               network_fk = network, 
                             )
+                    if network.network_default_gateway:
+                        iface.route_set.create(
+                                   network = "default",
+                                   gateway = gateway_value,
+                                   netmask = netmask_value,
+                                )
+                        routes_value = redis_route_format(iface.route_set.all())
+                        routes_key = "{}:{}:routes".format(node.client_fk.client_name, node.name)
+                        Utils.redis_write(routes_key, routes_value)
                 else:
                     iface = node.interface_set.get(network_fk=network)
                     iface.method = method_value
@@ -137,6 +176,14 @@ def node_create(request, store_id):
                        iface.bridge = bridge
                     iface.network_fk = network
                     iface.save()
+            for container in node.group_fk.container_catalog_set.all():
+                container_ip_address_field = "{}_ip_address".format(container.name.replace(" ", "_"))
+                if request.POST.get(container_ip_address_field):
+                    node.container_set.create(
+                                container_catalog_fk = container,
+                                ipaddress = request.POST.get(container_ip_address_field),
+                            )
+            Utils.single_container_redis_format(node.container_set.all())
             interfaces_json = interface_redis_format(node.interface_set.all())
             interfaces_key = "{}:{}:network_interfaces".format(node.client_fk.client_name, node.name)
             docker_network_json = docker_network_redis_format(node.interface_set.all())
@@ -144,10 +191,11 @@ def node_create(request, store_id):
             Utils.redis_write(interfaces_key, interfaces_json)
             Utils.redis_write(docker_network_key, docker_network_json)
 
+            dnsclient = node.group_fk.dnsclient_set.all()[0]
             #razor_tag_data = json.dumps({'name':node.name, 'rule': ["=",["fact","serialnumber"],node.serial_number]})
             razor_tag_data = json.dumps({'name':node.name, 'rule': ["=",["fact","boardserialnumber"],node.serial_number]})
             razor_policy_data = json.dumps({"name": node.name, "repo": "centos7", "task": "centos", "broker": "puppet", "enabled": True,
-                    "hostname": "{}.{}".format(node.name, node.dns_search),"root_password": "secret", "max_count": 20, "tags": [node.name] }) 
+                    "hostname": "{}.{}".format(node.name, dnsclient.domain),"root_password": "secret", "max_count": 20, "tags": [node.name] }) 
             Utils.razor_write(razor_tag_data, 'create-tag')
             Utils.razor_write(razor_policy_data, 'create-policy')
             return HttpResponseRedirect(reverse('node:create', kwargs={'store_id': store_id}))
@@ -197,14 +245,23 @@ def node_edit(request, node_id):
             gateway_value = request.POST.get("{}_gateway".format(network.network_name))
             bridge = network.network_bridge
             if network.network_interface not in str(node.interface_set.all()):
-                node.interface_set.create(
-                        method = method_value,
-                        ipaddress = ip_value,
-                        netmask = netmask_value,
-                        gateway = gateway_value,
-                        network_fk = network, 
-                        bridge = bridge,
+                iface = node.interface_set.create(
+                          method = method_value,
+                          ipaddress = ip_value,
+                          netmask = netmask_value,
+                          gateway = gateway_value,
+                          network_fk = network, 
+                          bridge = bridge,
                         )
+                if iface.network_fk.network_default_gateway:
+                    iface.route_set.create(
+                               network = "default",
+                               gateway = gateway_value,
+                               netmask = netmask_value,
+                            )
+                    routes_value = redis_route_format(iface.route_set.all())
+                    routes_key = "{}:{}:routes".format(node.client_fk.client_name, node.name)
+                    Utils.redis_write(routes_key, routes_value)
             else:
                 iface = node.interface_set.get(network_fk=network)
                 iface.method = method_value
@@ -218,7 +275,30 @@ def node_edit(request, node_id):
                    iface.gateway = gateway_value
                 iface.network_fk = network
                 iface.save()
-
+                if iface.network_fk.network_default_gateway:
+                    if not iface.route_set.get(network='default'):
+                       iface.route_set.create(
+                                  network = "default",
+                                  gateway = gateway_value,
+                                  netmask = netmask_value,
+                               )
+                    routes_value = redis_route_format(iface.route_set.all())
+                    routes_key = "{}:{}:routes".format(node.client_fk.client_name, node.name)
+                    Utils.redis_write(routes_key, routes_value)
+        for container in node.group_fk.container_catalog_set.all():
+            container_ip_address_field = "{}_ip_address".format(container.name.replace(" ", "_"))
+            if container.name not in str(node.container_set.all()):
+                if request.POST.get(container_ip_address_field):
+                    node.container_set.create(
+                                container_catalog_fk = container,
+                                ipaddress = request.POST.get(container_ip_address_field),
+                            )
+            else:
+                node_container = node.container_set.get(container_catalog_fk=container)
+                if(request.POST.get(container_ip_address_field) != node_container.ipaddress):
+                    node_container.ipaddress = request.POST.get(container_ip_address_field)
+                    node_container.save()
+        Utils.single_container_redis_format(node.container_set.all())
         interfaces_json = interface_redis_format(node.interface_set.all())
         interfaces_key = "Renner:{}:network_interfaces".format(node.name)
         docker_network_json = docker_network_redis_format(node.interface_set.all())
@@ -241,8 +321,11 @@ def node_edit(request, node_id):
     nodeForm = NodeForm()
     interfaceForm = InterfaceForm()
     interface_set = []
+    container_set = []
     for i in node.interface_set.all():
         interface_set.append(i.network_fk.network_interface)
+    for container in node.container_set.all():
+        container_set.append(container.container_catalog_fk.name)
     for field in nodeForm.fields:
         if field == "store":
             store = node.store_fk.name
@@ -267,6 +350,7 @@ def node_edit(request, node_id):
             'form': nodeForm,
             'interfaceForm': interfaceForm,
             'interface_set': interface_set,
+            'container_set': container_set,
             'client_id': client_id,
             'group': node.group_fk,
             'ip_teste': '33'

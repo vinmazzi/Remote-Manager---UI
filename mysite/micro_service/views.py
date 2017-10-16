@@ -15,7 +15,7 @@ def options(request, group_id):
                     'group': group,
                     })
 
-def container_redis_format(containers):
+def multi_container_redis_format(containers):
     host_containers = {}
     if containers:
         for container in containers:
@@ -27,14 +27,11 @@ def container_redis_format(containers):
             image_name = container.container_catalog_fk.image_name
             container_name = container.container_catalog_fk.name.replace(" ", "_")
             registry = "{}:{}".format(container.container_catalog_fk.registry_fk.url, container.container_catalog_fk.registry_fk.port)
-            container_hash_tmp = {container_name: {'primitive_class': 'ocf',
-                    'provided_by': 'heartbeat',
-                    'primitive_type': 'docker', 
-                    'parameters': {
-                         'image': "%s/%s:latest" %(registry,image_name),
-                         'name': container_name,
-                         'run_opts': "--network %s --ip %s" %(network_name, network_ip),
-                        }}}
+            container_hash_tmp = {container_name: {
+                    'image': "%s/%s:latest" %(registry,image_name),
+                    'ipaddress': network_ip,
+                    'network': network_name,
+                   }}
             host_containers[node].update(container_hash_tmp)
     for key in host_containers.keys():
         redis_key = host_containers[key]['redis_key']
@@ -161,7 +158,7 @@ def catalog_list(request, group_id):
                                 container_catalog_fk = container_catalog,
                                 ipaddress = container_ip,
                             )
-            container_redis_format(Container.objects.all())
+            multi_container_redis_format(Container.objects.all())
             return HttpResponseRedirect(reverse('micro_service:catalog_list', kwargs={'group_id':group.pk}))
     form = ContainerCatalogForm()
     for field in form.fields:
@@ -194,6 +191,6 @@ def catalog_container_delete(request):
     container = Container_catalog.objects.get(pk=request.POST.get('container_id'))
     group = container.group_fk
     container.delete()
-    container_redis_format(Container.objects.all())
+    multi_container_redis_format(Container.objects.all())
 
     return HttpResponseRedirect(reverse('micro_service:catalog_list', kwargs={'group_id':group.pk}))

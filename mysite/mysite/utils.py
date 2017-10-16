@@ -27,6 +27,29 @@ class Utils:
        except Exception as err:
            return HttpResponse(err)
 
+    def single_container_redis_format(containers):
+        host_containers = {}
+        if containers:
+            for container in containers:
+                node = container.node_fk
+                if "redis_key" not in host_containers.keys():
+                    host_containers = {'redis_key': "{}:{}:containers".format(node.client_fk.client_name, node.name)}
+                network_name = container.container_catalog_fk.network_fk.network_name
+                network_ip = container.ipaddress
+                image_name = container.container_catalog_fk.image_name
+                container_name = container.container_catalog_fk.name.replace(" ", "_")
+                registry = "{}:{}".format(container.container_catalog_fk.registry_fk.url, container.container_catalog_fk.registry_fk.port)
+                container_hash_tmp = {container_name: {
+                        'image': "%s/%s:latest" %(registry,image_name),
+                        'ipaddress': network_ip,
+                        'network': network_name,
+                       }}
+                host_containers.update(container_hash_tmp)
+        redis_key = host_containers['redis_key']
+        host_containers.pop('redis_key')
+        redis_value = json.dumps(host_containers)
+        Utils.redis_write(redis_key, redis_value)
+
     def create_certificate(node_name):
        ssh = paramiko.SSHClient()
        try:

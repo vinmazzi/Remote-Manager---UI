@@ -9,6 +9,7 @@ from node.views import interface_redis_format
 from mysite.utils import Utils
 # Create your views here.
 
+
 def network_list(request, group_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login:index'))
@@ -16,17 +17,19 @@ def network_list(request, group_id):
     if request.method == 'POST':
         form = NetworkForm(request.POST)
         bridge = request.POST.get('bridge')
+        default_gateway = request.POST.get('default_gateway')
         interface = request.POST.get('network_interface')
         bridge = ( False if bridge == None else True )
+        default_gateway = ( False if default_gateway == None else True )
         if form.is_valid():
             new_network = group.network_set.create(
                     network_name = form.cleaned_data['network_name'],
                     network_interface = interface,
                     network_description = form.cleaned_data['network_description'],
                     network_bridge = bridge,
+                    network_default_gateway = default_gateway,
                     group_fk = group,
                     )
-            new_network.save()
             return HttpResponseRedirect(reverse('network:list', kwargs={'group_id':group_id}))
     form = NetworkForm()
     for field in form.fields:

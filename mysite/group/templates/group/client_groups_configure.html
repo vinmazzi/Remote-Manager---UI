@@ -56,8 +56,21 @@
           <i class="entypo entypo-flow-line"></i>
         </div>
         <div class="title">
-          <h3>VLAN</h3>
-          <p>Configure VLAN</p>
+          <h3>Routes</h3>
+          <p>Configure Routes</p>
+        </div>
+      </div>
+    </a>
+	</div>
+	<div class="col-sm-3">
+    <a href="{% url 'dnsclient:edit' group_id=group.id %}">
+      <div class="tile-title tile-blue">
+        <div class="icon">
+          <i class="entypo entypo-bookmarks"></i>
+        </div>
+        <div class="title">
+          <h3>DNS Client</h3>
+          <p>Configure DNS Client</p>
         </div>
       </div>
     </a>
@@ -76,19 +89,6 @@
     </a>
 	</div>
 	<div class="col-sm-3">
-    <a href="#">
-      <div class="tile-title tile-blue">
-        <div class="icon">
-          <i class="entypo entypo-docs"></i>
-        </div>
-        <div class="title">
-          <h3>Logs</h3>
-          <p>Configure Logs</p>
-        </div>
-      </div>
-    </a>
-	</div>
-	<div class="col-sm-3">
     <a href="{% url 'ntp:edit' group_id=group.id %}">
       <div class="tile-title tile-blue">
         <div class="icon">
@@ -97,6 +97,19 @@
         <div class="title">
           <h3>NTP</h3>
           <p>Configure NTP</p>
+        </div>
+      </div>
+    </a>
+	</div>
+	<div class="col-sm-3">
+    <a href="{% url 'micro_service:options' group_id=group.id %}">
+      <div class="tile-title tile-blue">
+        <div class="icon">
+          <i class="entypo entypo-doc-text-inv"></i>
+        </div>
+        <div class="title">
+          <h3>Micro Services</h3>
+          <p>Configura Micro Services</p>
         </div>
       </div>
     </a>
@@ -115,14 +128,14 @@
     </a>
 	</div>
 	<div class="col-sm-3">
-    <a href="{% url 'micro_service:options' group_id=group.id %}">
+    <a href="#">
       <div class="tile-title tile-blue">
         <div class="icon">
-          <i class="entypo entypo-doc-text-inv"></i>
+          <i class="entypo entypo-docs"></i>
         </div>
         <div class="title">
-          <h3>Micro Services</h3>
-          <p>Configura Micro Services</p>
+          <h3>Logs</h3>
+          <p>Configure Logs</p>
         </div>
       </div>
     </a>

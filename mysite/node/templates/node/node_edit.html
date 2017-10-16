@@ -58,44 +58,20 @@ Dashboard
             {{ form.serial_number }}
           </div>
         </div>
-        <hr/>
-        <div class="form-group">
-          <label for="field-1" class="col-sm-3 control-label">{{ form.dns1_ip.label_tag }}</label>
-  
-          <div class="col-sm-5">
-            {{ form.dns1_ip }}
-          </div>
-        </div>
-        <hr/>
-        <div class="form-group">
-          <label for="field-1" class="col-sm-3 control-label">{{ form.dns2_ip.label_tag }}</label>
-  
-          <div class="col-sm-5">
-            {{ form.dns2_ip }}
-          </div>
-        </div>
-        <hr/>
-        <div class="form-group">
-          <label for="field-1" class="col-sm-3 control-label">{{ form.dns_domain.label_tag }}</label>
-  
-          <div class="col-sm-5">
-            {{ form.dns_search }}
-          </div>
-        </div>
       </div>
     </div>
     <script type="text/javascript">
-       $(document).ready(function(){
-         
-         $ip = $('#Vendas_ip').val().split("."); 
-         $("#teste_ip").val($ip['0'] + "." + $ip['1'] + "." + $ip['2'] + ".255");
+      // $(document).ready(function(){
+      //   
+      //   $ip = $('#Vendas_ip').val().split("."); 
+      //   $("#teste_ip").val($ip['0'] + "." + $ip['1'] + "." + $ip['2'] + ".255");
 
-         $("#Vendas_ip").change(function(){
-           $ip = $('#Vendas_ip').val().split("."); 
-           $("#teste_ip").val($ip['0'] + "." + $ip['1'] + "." + $ip['2'] + ".255");
-         });
-        
-       });
+      //   $("#Vendas_ip").change(function(){
+      //     $ip = $('#Vendas_ip').val().split("."); 
+      //     $("#teste_ip").val($ip['0'] + "." + $ip['1'] + "." + $ip['2'] + ".255");
+      //   });
+      //  
+      // });
        function show_modal(interface_id){
     
          jQuery('#modal-7').modal('show', {backdrop: 'static'});
@@ -116,6 +92,29 @@ Dashboard
     </script>
     <script>
      $(document).ready(function() {
+       {% for container in node.container_set.all %}
+       $("#{{container.container_catalog_fk.network_fk.network_name}}_ip").change(function(){
+         if($("#{{container.container_catalog_fk.network_fk.network_name}}_ip").val()){
+           ${{container.container_catalog_fk.network_fk.network_name}}_ip = $("#{{container.container_catalog_fk.network_fk.network_name}}_ip").val().split(".");
+           $("#{{container.container_catalog_fk.name.split|join:"_"}}_ip_address").val(${{container.container_catalog_fk.network_fk.network_name}}_ip[0] + "." + ${{container.container_catalog_fk.network_fk.network_name}}_ip[1] + "." + ${{container.container_catalog_fk.network_fk.network_name}}_ip[2] + ".{{container.container_catalog_fk.host_octect}}");
+         } else {
+           $("#{{container.container_catalog_fk.name.split|join:"_"}}_ip_address").val("");
+         }
+       });
+       {% endfor %}
+       {% for container in group.container_catalog_set.all %}
+         {% if container.name not in container_set %}
+          $("#{{container.network_fk.network_name}}_ip").change(function(){
+           if($("#{{container.network_fk.network_name}}_ip").val()){
+              ${{container.network_fk.network_name}}_ip = $("#{{container.network_fk.network_name}}_ip").val().split(".");
+              $("#{{container.name.split|join:"_"}}_ip_address").val(${{container.network_fk.network_name}}_ip[0] + "." + ${{container.network_fk.network_name}}_ip[1] + "." + ${{container.network_fk.network_name}}_ip[2] + ".{{container.host_octect}}");
+           } else {
+             $("#{{container.name.split|join:"_"}}_ip_address").val("");
+           }
+       });
+       //}
+         {% endif %}
+       {% endfor %}
     {% for interface in node.interface_set.all %}
 
          if($("#{{interface.network_fk.network_name}}_method").val() == "static"){
@@ -140,7 +139,11 @@ Dashboard
       }
 
       $("#{{network.network_name}}_method").change(function() {
-         $("#{{network.network_name}}_collapse").toggle();
+        if($("#{{ network.network_name}}_method").val() == "static"){
+             $("#{{network.network_name}}_collapse").show();
+        }else{
+             $("#{{network.network_name}}_collapse").hide();
+        }
       });
 
       {% endif %}
@@ -230,7 +233,7 @@ Dashboard
             <label for="field-1" class="col-sm-3 control-label">{{ network.network_name}} Ip: </label>
   
             <div class="col-sm-5">
-              <input type="text" class="form-control" name="{{network.network_name}}_ip" value="" />
+              <input type="text" class="form-control" id="{{network.network_name}}_ip" name="{{network.network_name}}_ip" value="" />
             </div>
           </div>
           <hr/>
@@ -254,8 +257,7 @@ Dashboard
       </div>
           {% endif %}
           {% endfor %}
-   {% if node.container_set.all %}
-    {% for container in node.container_set.all %}
+   {% for container in node.container_set.all %}
    <div class="panel panel-primary" data-collapsed="0">
     <div class="panel-heading">
       <div class="panel-title">
@@ -267,7 +269,7 @@ Dashboard
             <label for="field-1" class="col-sm-3 control-label">Image Name: </label>
   
             <div class="col-sm-3">
-              <input type="text" class="form-control" name="{{container.container_catalog_fk.name}}_image_name" value="{{container.container_catalog_fk.image_name}}" readonly />
+              <input type="text" class="form-control" name="{{container.container_catalog_fk.name.split|join:"_"}}_image_name" value="{{container.container_catalog_fk.image_name}}" readonly />
             </div>
           </div>
           <hr/>
@@ -275,7 +277,15 @@ Dashboard
             <label for="field-1" class="col-sm-3 control-label">Registry: </label>
   
             <div class="col-sm-3">
-              <input type="text" class="form-control" name="{{container.container_catalog_fk.name}}_registry" value="{{container.container_catalog_fk.registry_fk.url}}:{{container.container_catalog_fk.registry_fk.port}}" readonly />
+              <input type="text" class="form-control" name="{{container.container_catalog_fk.name.split|join:"_"}}_registry" value="{{container.container_catalog_fk.registry_fk.url}}:{{container.container_catalog_fk.registry_fk.port}}" readonly />
+            </div>
+          </div>
+          <hr/>
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">Network: </label>
+  
+            <div class="col-sm-3">
+              <input type="text" class="form-control"  id="{{container.container_catalog_fk.name.split|join:"_"}}_network" name="{{container.container_catalog_fk.name.split|join:"_"}}_network" value="{{container.container_catalog_fk.network_fk.network_name}}" readonly />
             </div>
           </div>
           <hr/>
@@ -283,14 +293,14 @@ Dashboard
             <label for="field-1" class="col-sm-3 control-label">Ip Address: </label>
   
             <div class="col-sm-3">
-              <input type="text" class="form-control" name="{{container.name}}_ip_address" value="{{container.ipaddress}}" readonly />
+              <input type="text" class="form-control"  id="{{container.container_catalog_fk.name.split|join:"_"}}_ip_address" name="{{container.container_catalog_fk.name.split|join:"_"}}_ip_address" value="{{container.ipaddress}}" readonly />
             </div>
           </div>
       </div>
     </div>
     {% endfor %}
-   {% else %}
    {% for container in group.container_catalog_set.all %}
+   {% if container.name not in container_set %}
    <div class="panel panel-primary" data-collapsed="0">
     <div class="panel-heading">
       <div class="panel-title">
@@ -302,7 +312,7 @@ Dashboard
             <label for="field-1" class="col-sm-3 control-label">Image Name: </label>
   
             <div class="col-sm-3">
-              <input type="text" class="form-control" name="{{container.name}}_name" value="{{container.image_name}}" readonly />
+              <input type="text" class="form-control" name="{{container.name.split|join:"_"}}_name" value="{{container.image_name}}" readonly />
             </div>
           </div>
           <hr/>
@@ -310,21 +320,29 @@ Dashboard
             <label for="field-1" class="col-sm-3 control-label">Registry: </label>
   
             <div class="col-sm-3">
-              <input type="text" class="form-control" name="{{container.name}}_registry" value="{{container.registry_fk.url}}:{{container.registry_fk.port}}" readonly />
+              <input type="text" class="form-control" name="{{container.name.split|join:"_"}}_registry" value="{{container.registry_fk.url}}:{{container.registry_fk.port}}" readonly />
+            </div>
+          </div>
+          <hr/>
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">Network: </label>
+  
+            <div class="col-sm-3">
+              <input type="text" class="form-control" name="{{container.name.split|join:"_"}}_network" value="{{container.network_fk.network_name}}" readonly />
             </div>
           </div>
           <hr/>
           <div class="form-group">
             <label for="field-1" class="col-sm-3 control-label">Ip Address: </label>
   
-            <div class="col-sm-5">
-              <input type="text" class="form-control" name="{{container.name}}_ip_address" value="{{container.ipaddress}}" readonly />
+            <div class="col-sm-3">
+              <input type="text" class="form-control" id="{{container.name.split|join:"_"}}_ip_address" name="{{container.name.split|join:"_"}}_ip_address" value="{{container.ipaddress}}" readonly />
             </div>
           </div>
       </div>
     </div>
-   {% endfor %}
    {% endif %}
+   {% endfor %}
         <div class="form-group">
           <div class="col-sm-offset-3 col-sm-5">
             <button type="submit" class="btn btn-default">Submit</button>

@@ -18,6 +18,7 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^', include('login.urls')),
+    url(r'^dnsclient/', include('dnsclient.urls')),
     url(r'^mservices/', include('micro_service.urls')),
     url(r'^user/', include('user.urls')),
     url(r'^ntp/', include('ntp.urls')),
