@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ['127.0.0.1','192.168.1.107']
 # Application definition
 
 INSTALLED_APPS = [
+    'cloud.apps.CloudConfig',
     'route.apps.RouteConfig',
     'dnsclient.apps.DnsclientConfig',
     'micro_service.apps.MicroServiceConfig',

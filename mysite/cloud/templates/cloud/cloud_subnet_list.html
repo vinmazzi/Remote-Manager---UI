@@ -1,0 +1,240 @@
+{% extends 'group/header.html' %}
+{% load static %}
+{% block title %}
+Triamvos Cloud Subnet
+{% endblock %}
+{% block content %}
+<script type="text/javascript">
+function show_modal(subnet_id){
+     jQuery('#modal-7').modal();
+
+     $.ajax({
+       url: "/cloud/subnet/"+ subnet_id +"/subnet_edit",
+       contentType: "application/json; charset=utf-8",
+       success: function(response)
+       {
+         $("#modal_subnet_name").val(response.name);
+         $("#modal_subnet_description").val(response.description);
+         $("#modal_subnet_network").val(response.cidr_block);
+         $("#modal_subnet_vpc").val(response.vpc_fk);
+         $("#modal_subnet_vpc").select2();
+         $("#modal_subnet_edit").attr('action', '/cloud/subnet/'+ response.id +'/subnet_edit');
+       }
+     });
+}
+</script>
+           <script type="text/javascript">
+function send_or_edit (my_action, my_form) {
+
+  if (my_action == "delete") {
+    document.getElementById(my_form).action = "{% url 'cloud:subnet_delete' %}";
+    document.getElementById(my_form).submit();
+  }
+
+}
+         </script>
+      <ol class="breadcrumb bc-3">
+            <li>
+        <a href="index.html"><i class="entypo-home"></i>Home</a>
+      </li>
+          <li>
+              <a href="layout-api.html">Triamvos Cloud</a>
+          </li>
+        <li class="active">
+              <strong>Triamvos Cloud Subnet</strong>
+          </li>
+          </ol>
+<h2>Cloud Subnet</h2>
+<br/ >
+<div class="row">
+  <div class="col-md-12">
+   <ul class="nav nav-tabs bordered"><!-- available classes "bordered", "right-aligned" -->
+         <li class="active">
+           <a href="#home" data-toggle="tab">
+             <span class="visible-xs"><i class="entypo-home"></i></span>
+             <span class="hidden-xs">Subnet List</span>
+           </a>
+         </li>
+         <li>
+           <a href="#profile" data-toggle="tab">
+             <span class="visible-xs"><i class="entypo-user"></i></span>
+             <span class="hidden-xs">Add Subnet</span>
+           </a>
+         </li>
+   </ul>
+       
+       <div class="tab-content">
+         <div class="tab-pane active" id="home">
+           
+             <table class="table table-bordered datatable" id="table-3">
+              <thead>
+                <tr>
+                  <th>
+                    <div class="checkbox checkbox-replace">
+                      <input type="checkbox" id="chk-1">
+                    </div>
+                  </th>
+                  <th>Subnet Name</th>
+                  <th>Subnet Network</th>
+                  <th>Subnet Vpc</th>
+                  <th>Subnet Description</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+               {% for subnet in subnets %} 
+               <form method="post" id="form-{{subnet.pk}}">
+               {% csrf_token %}
+                <tr>
+                  <input type="hidden" name="subnet_id" id="subnet_id_{{subnet.pk}}" value="{{subnet.pk}}">
+                  <td>
+                    <div class="checkbox checkbox-replace">
+                      <input type="checkbox" name="subnet_id" value="">
+                    </div>
+                  </td>
+                  <td>{{subnet.name}}</td>
+                  <td>{{subnet.cidr_block}}</td>
+                  <td>{{subnet.vpc_fk.name}}</td>
+                  <td>{{subnet.description}}</td>
+                  <td>
+                    <a href="#" onclick="show_modal({{ subnet.pk }});" class="btn btn-default btn-sm btn-icon icon-left"> <i class="entypo-pencil"></i> Edit </a>
+                    <a href="#" name="form-{{subnet.pk}}" class="btn btn-danger btn-sm btn-icon icon-left" onclick="send_or_edit('delete', this.name);">
+
+                      <i class="entypo-cancel"></i>
+                      Delete
+
+                    </a>
+                  </td>
+                </tr>
+                </form>
+                {%endfor%}
+              </tbody>
+            </table>
+         </div>
+         <div class="tab-pane" id="profile">
+       <div class="panel panel-primary" data-collapsed="0">
+          <div class="panel-heading">
+            <div class="panel-title">
+              Add New Subnet to the Cloud
+            </div>
+          </div>
+            <div class="panel-body">
+              <form role="form" class="form-horizontal form-groups-bordered" method="post" action="#">
+                {% csrf_token %}
+                <div class="form-group">
+                  <label for="field-1" class="col-sm-3 control-label">{{ form.name.label_tag }}</label>
+                  <div class="col-sm-3">
+                    {{ form.name }}
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="field-1" class="col-sm-3 control-label">VPC: </label>
+                  <div class="col-sm-3">
+                    <select name="vpc" required="true" id="vpc" class="select2" data-allow-clear="true" data-placeholder="Vpc">
+                    <option></option>
+                    {% for vpc in vpcs %}
+                    <option value="{{vpc.pk}}">{{vpc.name}}</option>
+                    {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="field-1" class="col-sm-3 control-label">{{ form.cidr_block.label_tag }}</label>
+                  <div class="col-sm-3">
+                    {{ form.cidr_block }}
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="field-1" class="col-sm-3 control-label">{{ form.description.label_tag }}</label>
+                  <div class="col-sm-3">
+                    {{ form.description }}
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="col-sm-offset-3 col-sm-5">
+                    <button type="submit" class="btn btn-default">Submit</button>
+                  </div>
+                </div>
+              </form>
+          </div>
+        </div>
+       </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block bottom_includes %}
+
+  <link rel="stylesheet" href="{% static 'assets/js/datatables/responsive/css/datatables.responsive.css'%}">
+  <link rel="stylesheet" href="{% static 'assets/js/select2/select2-bootstrap.css'%}">
+  <link rel="stylesheet" href="{% static 'assets/js/select2/select2.css'%}">
+  <script src="{% static 'assets/js/gsap/main-gsap.js'%}"></script>
+  <script src="{% static 'assets/js/jquery-ui/js/jquery-ui-1.10.3.minimal.min.js'%}"></script>
+  <script src="{% static 'assets/js/bootstrap.js'%}"></script>
+  <script src="{% static 'assets/js/joinable.js'%}"></script>
+  <script src="{% static 'assets/js/resizeable.js'%}"></script>
+  <script src="{% static 'assets/js/neon-api.js'%}"></script>
+  <script src="{% static 'assets/js/jquery.dataTables.min.js'%}"></script>
+  <script src="{% static 'assets/js/datatables/TableTools.min.js'%}"></script>
+  <script src="{% static 'assets/js/dataTables.bootstrap.js'%}"></script>
+  <script src="{% static 'assets/js/datatables/jquery.dataTables.columnFilter.js'%}"></script>
+  <script src="{% static 'assets/js/datatables/lodash.min.js'%}"></script>
+  <script src="{% static 'assets/js/datatables/responsive/js/datatables.responsive.js'%}"></script>
+  <script src="{% static 'assets/js/select2/select2.min.js'%}"></script>
+  <script src="{% static 'assets/js/neon-chat.js'%}"></script>
+  <script src="{% static 'assets/js/neon-custom.js'%}"></script>
+  <script src="{% static 'assets/js/neon-demo.js'%}"></script>
+  <script src="{% static 'assets/js/bootstrap-switch.min.js'%}"></script>
+{% endblock %}
+
+{% block modals %}
+<div class="modal fade" id="modal-7">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Edit Network</h4>
+      </div>
+      <div class="modal-body">
+        <form name="modal_subnet_edit" id="modal_subnet_edit" class="form-horizontal form-groups-bordered" method="post" action="#">
+        {% csrf_token %}
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">Name: </label>
+            <div class="col-sm-4">
+              <input type="text" id="modal_subnet_name" name="modal_subnet_name" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">Network: </label>
+            <div class="col-sm-4">
+              <input type="text" id="modal_subnet_network" name="modal_subnet_network" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">VPC: </label>
+            <div class="col-sm-4">
+              <select name="modal_subnet_vpc" required="true" id="modal_subnet_vpc" class="select2" data-allow-clear="true" data-placeholder="Vpc">
+              <option></option>
+              {% for vpc in vpcs %}
+              <option id="modal_subnet_{{vpc.pk}}" value="{{vpc.pk}}">{{vpc.name}}</option>
+              {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">Description: </label>
+            <div class="col-sm-3">
+              <textarea name="modal_subnet_description" id="modal_subnet_description" class="form-control" style="height: 75px; width: 182px; overflow: scroll; word-wrap: break-word; resize: horizontal;"></textarea>
+            </div>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-blue" >Save Changes</button>
+      </div>
+    </div>
+    </form>
+   </div>
+</div>
+{% endblock %}

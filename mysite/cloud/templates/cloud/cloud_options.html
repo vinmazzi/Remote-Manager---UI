@@ -1,0 +1,88 @@
+{% extends 'group/header.html' %}
+{% block title %}Configure Triamvos Cloud{% endblock %}
+{% block content %}
+
+      <ol class="breadcrumb bc-3">
+            <li>
+        <a href="index.html"><i class="entypo-home"></i>Home</a>
+      </li>
+          <li>
+              <a href="layout-api.html">Triamvos Cloud</a>
+          </li>
+        <li class="active">
+
+              <strong>Triamvos Cloud Configure</strong>
+          </li>
+          </ol>
+
+<h2>Configure Triamvos Cloud</h2>
+<br/ >
+<div class="row">
+	<div class="col-sm-3">
+    <a href="{% url 'cloud:vpc_list'%}">
+      <div class="tile-title tile-gray">
+        <div class="icon">
+          <i class="entypo entypo-cloud"></i>
+        </div>
+        <div class="title">
+          <h3>VPC Configuration</h3>
+          <p>Configure Client VPC.</p>
+        </div>
+      </div>
+    </a>
+	</div>
+	<div class="col-sm-3">
+    <a href="{% url 'cloud:subnet_list' %}">
+      <div class="tile-title tile-gray">
+        <div class="icon">
+          <i class="entypo entypo-flow-tree"></i>
+        </div>
+        <div class="title">
+          <h3>Configure Subnets</h3>
+          <p>Configure Client Cloud Subnets.</p>
+        </div>
+      </div>
+    </a>
+	</div>
+	<div class="col-sm-3">
+    <a href="{% url 'cloud:fwrule_group_list' %}">
+      <div class="tile-title tile-gray">
+        <div class="icon">
+          <i class="entypo entypo-lock"></i>
+        </div>
+        <div class="title">
+          <h3>Firewall Rules Group</h3>
+          <p>Configure Group of Firewall rules.</p>
+        </div>
+      </div>
+    </a>
+	</div>
+	<div class="col-sm-3">
+    <a href="#">
+      <div class="tile-title tile-gray">
+        <div class="icon">
+          <i class="entypo entypo-newspaper"></i>
+        </div>
+        <div class="title">
+          <h3>Configure Images</h3>
+          <p>Configure Client Cloud Images.</p>
+        </div>
+      </div>
+    </a>
+	</div>
+	<div class="col-sm-3">
+    <a href="#">
+      <div class="tile-title tile-gray">
+        <div class="icon">
+          <i class="entypo entypo-popup"></i>
+        </div>
+        <div class="title">
+          <h3>Configure Instances</h3>
+          <p>Configure Client Cloud Instances.</p>
+        </div>
+      </div>
+    </a>
+	</div>
+</div>
+<br />
+{% endblock %}
