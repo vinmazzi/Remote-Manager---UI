@@ -22,7 +22,94 @@ function show_modal(sg_id){
      });
 }
 
-                    
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+
+
+function add_rule(){
+  var csrftoken = $('[name="csrfmiddlewaretoken"]').val()
+  $.ajaxSetup({
+      beforeSend: function(xhr, settings) {
+          if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+              xhr.setRequestHeader("X-CSRFToken", csrftoken);
+          }
+      }
+  });
+  json_data = "{'protocol': '" + $('#rule_protocol').val() + "', 'port_range': '" + $('#rule_port_range').val() + "', 'source': '" + $('#rule_source').val() + "', 'description': '" +  $('#rule_description').val() + "', 'sg_id': '" + $("#manage_rules_modal_sg_id").val() + "'}";
+  $.ajax({
+    type: "POST",
+    url: "/cloud/fwrule/group/rules/create",
+    contentType: "application/json; charset=utf-8",
+    dataType: "json",
+    data: json_data,
+//    {
+//      'protocol': $('#rule_protocol').val(),
+//      'port_range': $('#rule_port_range').val(),
+//      'source': $('#rule_source').val(),
+//      'description': $('#rule_description').val(),
+//      'sg_id': $("#manage_rules_modal_sg_id").val(),
+//    },
+
+    success: function(response)
+    {
+      $('#rule_protocol').val(" ");
+      select = $("select#rule_protocol").data("selectBox-selectBoxIt");
+      select.refresh();
+      $('#rule_port_range').val("");
+      $('#rule_source').val("");
+      $('#rule_description').val("");
+      show_manage_rules($("#manage_rules_modal_sg_id").val());
+      //alert(response.ret);
+    }
+  });
+
+}
+
+function delete_rule(rule_id, sg_id){
+  var csrftoken = $('[name="csrfmiddlewaretoken"]').val()
+  $.ajaxSetup({
+      beforeSend: function(xhr, settings) {
+          if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+              xhr.setRequestHeader("X-CSRFToken", csrftoken);
+          }
+      }
+  });
+
+  $.ajax({
+    type: "POST",
+    url: "/cloud/fwrule/group/rules/delete",
+    contentType: "application/json; charset=utf-8",
+    dataType: "json",
+    data: {
+      'rule_id': rule_id, 
+    },
+
+    success: function(response)
+    {
+      show_manage_rules(sg_id)
+    }
+  });
+
+}
+
 function show_manage_rules(sg_id){
   jQuery('#rule_manage_rules').modal();
   $("#manage_rules_modal_sg_id").val(sg_id);
@@ -34,10 +121,10 @@ function show_manage_rules(sg_id){
     {
       $('#list_rules').find('tbody').empty();
       keys = Object.keys(response)
-      for (i=0; i <= keys.length; i++){
+      for (i=0; i < keys.length; i++){
         key = keys[i];
         rule = response[key]
-				$('#list_rules').find('tbody').append("<tr><td>" + rule.protocol + "</td><td>" + rule.to_port + "</td><td>"+ rule.cidr  +"</td><td>" + rule.description + "</td><td><a href=\"#\" onclick=\"show_modal({{ sg.pk }});\" class=\"btn btn-default btn-sm btn-icon icon-left\"> <i class=\"entypo-pencil\"></i> Edit </a>  <a href=\"#\" name=\"form-"+ key +"\" class=\"btn btn-danger btn-sm btn-icon icon-left\" onclick=\"send_or_edit('delete', this.name);\"><i class=\"entypo-cancel\"></i> Delete </a></td></tr>");
+          $('#list_rules').find('tbody').append("<tr><input type=\"hidden\" value=\""+ key +"\" name=\"sg_rule_id\"/><td>" + rule.protocol + "</td><td>" + rule.port + "</td><td>"+ rule.cidr  +"</td><td>" + rule.description + "</td><td><a href=\"#\" onclick=\"show_modal({{ sg.pk }});\" class=\"btn btn-default btn-sm btn-icon icon-left\"> <i class=\"entypo-pencil\"></i> Edit </a>  <a href=\"#\" name=\"form-"+ key +"\" class=\"btn btn-danger btn-sm btn-icon icon-left\" onclick=\"delete_rule(" + key + "," + sg_id + ");\"><i class=\"entypo-cancel\"></i> Delete </a></td></form></tr>");
       }
     }
   });
@@ -47,8 +134,14 @@ function show_manage_rules(sg_id){
            <script type="text/javascript">
 function send_or_edit (my_action, my_form) {
 
+  if (my_action == "delete_rule") {
+    document.getElementById(my_form).action = "{% url 'cloud:fwrule_group_rule_delete' %}";
+    document.getElementById(my_form).submit();
+    show_manage_rules(sg_id);
+  }
+
   if (my_action == "delete") {
-    document.getElementById(my_form).action = "#";
+    document.getElementById(my_form).action = "{% url 'cloud:fwrule_group_delete' %}";
     document.getElementById(my_form).submit();
   }
 
@@ -205,7 +298,30 @@ function send_or_edit (my_action, my_form) {
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">Manage Rules</h4>
+        <h4 class="modal-title">List Rules</h4>
+      </div>
+      <div class="modal-body">
+           <table class="table table-bordered" id="list_rules" width="100%">
+						<col style="width:8%">
+						<col style="width:8%">
+						<col style="width:14%">
+						<col style="width:20%">
+						<col style="width:20%">
+            <thead>
+              <tr>
+                <th>Protocol</th>
+                <th>Port Range</th>
+                <th>Source</th>
+                <th>Description</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+      </div>
+      <div class="modal-header">
+        <h4 class="modal-title">Add Rules</h4>
       </div>
       <div class="modal-body">
         <form name="modal_sg_manage_rules" id="modal_sg_manage_rules" class="form-horizontal form-groups-bordered" method="post" action="#">
@@ -228,7 +344,7 @@ function send_or_edit (my_action, my_form) {
                 <input type="hidden" name="manage_rules_modal_sg_id" id="manage_rules_modal_sg_id" value="">
                 <td>
                   <div class="col-sm-25">
-									<select name="modal_sg_protocol" required="true" id="modal_sg_protocol" data-first-option="false" class="selectboxit">
+									<select name="rule_protocol" required="true" id="rule_protocol" data-first-option="false" class="selectboxit">
 									<option>Select Protocol</option>
 									<option value="tcp">TCP</option>
 									<option value="udp">UDP</option>
@@ -238,17 +354,17 @@ function send_or_edit (my_action, my_form) {
                 </td>
                 <td>
                   <div class="col-sm-13">
-                    <input type="text" id="#" name="#" class="form-control" />
+                    <input type="text" id="rule_port_range" name="rule_port_range" class="form-control" />
                   </div>
                 </td>
                 <td>
                   <div class="col-sm-12">
-                    <input type="text" id="#" name="#" class="form-control" />
+                    <input type="text" id="rule_source" name="rule_source" class="form-control" />
                   </div>
                 </td>
                 <td>
                   <div class="col-sm-10">
-                    <input type="text" id="#" name="#" class="form-control" />
+                    <input type="text" id="rule_description" name="rule_description" class="form-control" />
                   </div>
                 </td>
               </tr>
@@ -257,31 +373,9 @@ function send_or_edit (my_action, my_form) {
           </table>
         </form>
       </div>
-      <div class="modal-header">
-        <h4 class="modal-title">List Rules</h4>
-      </div>
-      <div class="modal-body">
-           <table class="table table-bordered" id="list_rules" width="100%">
-						<col style="width:8%">
-						<col style="width:8%">
-						<col style="width:14%">
-						<col style="width:20%">
-            <thead>
-              <tr>
-                <th>Protocol</th>
-                <th>Port Range</th>
-                <th>Source</th>
-                <th>Description</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-            </tbody>
-          </table>
-      </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-blue" >Save Changes</button>
+        <button onclick="add_rule()" class="btn btn-blue" >Add Rule</button>
       </div>
     </div>
   </div>

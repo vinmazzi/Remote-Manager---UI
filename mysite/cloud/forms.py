@@ -23,6 +23,9 @@ class SecurityGroup_RuleForm(forms.Form):
     name = forms.CharField(label="Rule Name", max_length=90)
     description = forms.CharField(label="Description", max_length=100, widget=forms.Textarea())
     protocol = forms.CharField(label="Protocol", max_length=100)
-    from_port = forms.CharField(label="Source Port", max_length=8)
-    to_port = forms.CharField(label="Destination Port", max_length=8)
+    port = forms.CharField(label="Source Port", max_length=8)
     cidr = forms.CharField(label="Source", max_length=20)
+
+class CloudConfigurationGroupForm(forms.Form):
+    name = forms.CharField(label="Name", max_length=90)
+    description = forms.CharField(label="Description", max_length=100)

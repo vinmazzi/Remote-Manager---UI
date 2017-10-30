@@ -12,5 +12,11 @@ urlpatterns = [
         url(r'^subnet/(?P<subnet_id>[0-9]+)/subnet_edit', views.subnet_edit, name="subnet_edit"),
         url(r'^fwrule/group/list', views.fwrule_group_list, name="fwrule_group_list"),
         url(r'^fwrule/group/(?P<sg_id>[0-9]+)/edit', views.fwrule_group_edit, name="fwrule_group_edit"),
+        url(r'^fwrule/group/delete', views.fwrule_group_delete, name="fwrule_group_delete"),
         url(r'^fwrule/group/rules/(?P<sg_id>[0-9]+)/edit', views.fwrule_group_rule_edit, name="fwrule_group_rule_edit"),
+        url(r'^fwrule/group/rules/delete', views.fwrule_group_rule_delete, name="fwrule_group_rule_delete"),
+        url(r'^fwrule/group/rules/create', views.fwrule_group_rule_create, name="fwrule_group_rule_create"),
+        url(r'^configuration/group/list', views.configuration_group_list, name="configuration_group_list"),
+        url(r'^configuration/group/delete', views.configuration_group_delete, name="configuration_group_delete"),
+        url(r'^subnets-sgs-roles', views.subnets_sgs_roles, name="subnets-sgs-roles"),
 ]

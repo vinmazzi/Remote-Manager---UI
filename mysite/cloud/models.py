@@ -38,9 +38,28 @@ class SecurityGroup_Rule(models.Model):
     description = models.CharField(max_length=100, default="N/A")
     securityGroup_fk = models.ForeignKey(SecurityGroup, on_delete=models.CASCADE, default=0)
     protocol = models.CharField(max_length=100)
-    from_port = models.CharField(max_length=8)
-    to_port = models.CharField(max_length=8)
+    port = models.CharField(max_length=8)
     cidr = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.name
+
+class CloudRole(models.Model):
+    name = models.CharField(max_length=90)
+    description = models.CharField(max_length=100, default="N/A")
+    client_fk = models.ForeignKey(Client, on_delete=models.CASCADE, default=0)
+
+    def __str__(self):
+        return self.name
+
+class CloudConfigurationGroup(models.Model):
+    name = models.CharField(max_length=90)
+    description = models.CharField(max_length=100, default="N/A")
+    securityGroup_fk = models.ForeignKey(SecurityGroup, on_delete=models.CASCADE, default=0)
+    vpc_fk = models.ForeignKey(Vpc, on_delete=models.CASCADE, default=0)
+    subnet_fk = models.ForeignKey(Subnet, on_delete=models.CASCADE, default=0)
+    cloudrole_fk = models.ForeignKey(CloudRole, on_delete=models.CASCADE, default=0)
+    client_fk = models.ForeignKey(Client, on_delete=models.CASCADE, default=0)
 
     def __str__(self):
         return self.name
