@@ -18,5 +18,6 @@ urlpatterns = [
         url(r'^fwrule/group/rules/create', views.fwrule_group_rule_create, name="fwrule_group_rule_create"),
         url(r'^configuration/group/list', views.configuration_group_list, name="configuration_group_list"),
         url(r'^configuration/group/delete', views.configuration_group_delete, name="configuration_group_delete"),
+        url(r'^configuration/group/(?P<cg_id>[0-9]+)/edit', views.configuration_group_edit, name="configuration_group_edit"),
         url(r'^subnets-sgs-roles', views.subnets_sgs_roles, name="subnets-sgs-roles"),
 ]

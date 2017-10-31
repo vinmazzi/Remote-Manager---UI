@@ -9,16 +9,24 @@ function show_modal(configuration_id){
      jQuery('#modal-7').modal();
 
      $.ajax({
-       url: "/cloud/configuration/"+ configuration_id +"/configuration_edit",
+       url: "/cloud/configuration/group/"+ configuration_id +"/edit",
        contentType: "application/json; charset=utf-8",
        success: function(response)
        {
          $("#modal_configuration_name").val(response.name);
          $("#modal_configuration_description").val(response.description);
-         $("#modal_configuration_vpc").val(response.vpc);
-         $("#modal_configuration_subnet").val(response.subnet);
-         $("#modal_configuration_sg").val(response.sg);
-         $("#modal_configuration_edit").attr('action', '/cloud/configuration/'+ response.id +'/configuration_edit');
+         $("#modal_configuration_vpc").val(response.vpc_fk).trigger("change");
+         $("#modal_configuration_vpc").select2();
+         // Atrasar a execução do val para que o trigger_change do vpc execute primeiro e adicione as opções. (gambi)
+         setTimeout(function(){
+           $("#modal_configuration_subnet").val(response.subnet_fk);
+           $("#modal_configuration_subnet").select2();
+           $("#modal_configuration_sg").val(response.securityGroup_fk);
+           $("#modal_configuration_sg").select2();
+           $("#modal_configuration_role").val(response.cloudrole_fk);
+           $("#modal_configuration_role").select2();
+         }, 100);
+         $("#modal_configuration_edit").attr('action', '/cloud/configuration/group/'+ response.id +'/edit');
        }
      });
 }
@@ -44,6 +52,56 @@ function csrfSafeMethod(method) {
     // these HTTP methods do not require CSRF protection
     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 }
+
+
+$(document).ready(function() {
+  $("#modal_configuration_vpc").change(function() {
+    var csrftoken = $('[name="csrfmiddlewaretoken"]').val()
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+
+    if($("#modal_configuration_vpc").val() != "") {
+      var json_data = "{'vpc_id': "+ $("#modal_configuration_vpc").val() +"}"
+      $.ajax({
+        type: "POST",
+        url: "/cloud/subnets-sgs-roles",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        data: json_data,
+        success: function(response)
+        {
+          $("#modal_configuration_subnet").find('option').remove();
+          $("#modal_configutation_sg").find('option').remove();
+          $("#modal_configuration_role").find('option').remove();
+          var subnet_keys = Object.keys(response.subnets)
+          var sgs_keys = Object.keys(response.sgs)
+          var roles_keys = Object.keys(response.roles)
+          for (var i = '0'; i < subnet_keys.length; i++ ){
+            var key = subnet_keys[i]
+            $('#modal_configuration_subnet').append($("<option></option>").attr("value",response.subnets[key]['id']).text(key))
+          }
+          for (var i = '0'; i < sgs_keys.length; i++ ){
+            var key = sgs_keys[i]
+            $('#modal_configuration_sg').append($("<option></option>").attr("value",response.sgs[key]['id']).text(key))
+          }
+          for (var i = '0'; i < roles_keys.length; i++ ){
+            var key = roles_keys[i]
+            $('#modal_configuration_role').append($("<option></option>").attr("value",response.roles[key]['id']).text(key))
+          }
+        }
+      });
+    } else {
+       $("#modal_configuration_subnet").find('option').remove();
+       $("#modal_configuration_sg").find('option').remove();
+       $("#modal_configuration_role").find('option').remove();
+    }
+  });
+});
 
 $(document).ready(function() {
   $("#vpc").change(function() {
@@ -300,17 +358,44 @@ function send_or_edit (my_action, my_form) {
             </div>
           </div>
           <div class="form-group">
-            <label for="field-1" class="col-sm-3 control-label">Network: </label>
+            <label for="field-1" class="col-sm-3 control-label">VPC: </label>
             <div class="col-sm-4">
-              <input type="text" id="modal_configuration_network" name="modal_configuration_network" class="form-control" />
+              <select name="modal_configuration_vpc" required="true" id="modal_configuration_vpc" class="select2" data-allow-clear="true" data-placeholder="Vpc">
+              <option></option>
+              {% for vpc in vpcs %}
+              <option value="{{vpc.pk}}">{{vpc.name}}</option>
+              {% endfor %}
+              </select>
             </div>
           </div>
+          </hr>
           <div class="form-group">
-            <label for="field-1" class="col-sm-3 control-label">Region: </label>
+            <label for="field-1" class="col-sm-3 control-label">Subnet: </label>
             <div class="col-sm-4">
-              <input type="text" id="modal_configuration_region" name="modal_configuration_region" class="form-control" />
+              <select name="modal_configuration_subnet" required="true" id="modal_configuration_subnet" class="select2" data-allow-clear="true" data-placeholder="Subnet">
+              <option></option>
+              </select>
             </div>
           </div>
+          </hr>
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">Firewall Group: </label>
+            <div class="col-sm-4">
+              <select name="modal_configuration_sg" required="true" id="modal_configuration_sg" class="select2" data-allow-clear="true" data-placeholder="Firewall Group">
+              <option></option>
+              </select>
+            </div>
+          </div>
+          </hr>
+          <div class="form-group">
+            <label for="field-1" class="col-sm-3 control-label">Role: </label>
+            <div class="col-sm-4">
+              <select name="modal_configuration_role" required="true" id="modal_configuration_role" class="select2" data-allow-clear="true" data-placeholder="Role">
+              <option></option>
+              </select>
+            </div>
+          </div>
+          </hr>
           <div class="form-group">
             <label for="field-1" class="col-sm-3 control-label">Description: </label>
             <div class="col-sm-3">

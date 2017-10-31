@@ -327,6 +327,33 @@ def configuration_group_list(request):
             'configurations': configurations,
         })
 
+def configuration_group_edit(request, cg_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login:index'))
+    client_id = request.session.get('client_id')
+    client = Client.objects.get(pk=client_id)
+    cg = CloudConfigurationGroup.objects.get(pk=cg_id)
+    if request.method == 'POST':
+        cg.name = request.POST.get("modal_configuration_name")
+        cg.description = request.POST.get("modal_configuration_description")
+        cg.vpc_fk = Vpc.objects.get(pk=request.POST.get("modal_configuration_vpc"))
+        cg.subnet_fk = Subnet.objects.get(pk=request.POST.get("modal_configuration_subnet"))
+        cg.securityGroup_fk = SecurityGroup.objects.get(pk=request.POST.get("modal_configuration_sg"))
+        cg.role_fk = CloudRole.objects.get(pk=request.POST.get("modal_configuration_role"))
+        cg.save()
+        return HttpResponseRedirect(reverse('cloud:configuration_group_list'))
+    return HttpResponse(json.dumps(model_to_dict(cg)), content_type="application/json")
+
+def configuration_group_delete(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login:index'))
+    client_id = request.session.get('client_id')
+    client = Client.objects.get(pk=client_id)
+    cg = CloudConfigurationGroup.objects.get(pk=request.POST.get('configuration_id'))
+    cg.delete()
+    return HttpResponseRedirect(reverse('cloud:configuration_group_list'))
+
+
 def subnets_sgs_roles(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login:index'))
@@ -351,5 +378,3 @@ def subnets_sgs_roles(request):
     return HttpResponse(json.dumps(obj_hash), content_type="application/json")
 
 
-def configuration_group_delete(request):
-    return HttpResponse("DELETE!!!")
