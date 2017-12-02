@@ -4,9 +4,10 @@ from django.http import HttpResponse, HttpResponseRedirect
 from client.models import Client
 from group.models import Group
 from django.forms.models import model_to_dict
-import redis, ast, json, paramiko
-from .forms import VpcForm, SubnetForm, SecurityGroupForm, CloudConfigurationGroupForm
-from .models import Vpc, Subnet, SecurityGroup, SecurityGroup_Rule, CloudConfigurationGroup, CloudRole
+import redis, ast, json, paramiko, boto3
+from .forms import VpcForm, SubnetForm, SecurityGroupForm, CloudConfigurationGroupForm, CloudInstanceForm
+from .models import Platform, Vpc, Subnet, SecurityGroup, SecurityGroup_Rule, CloudConfigurationGroup, CloudRole, CloudInstance
+from .cloud_actions import CloudActions
 from mysite.utils import Utils
 
 # Create your views here.
@@ -65,6 +66,22 @@ def sg_redis_format(sgs, client):
     json_sgs_hash = json.dumps(sgs_hash)
     Utils.redis_write(key_name, json_sgs_hash)
 
+def instance_redis_format(instances, client):
+    instances_hash = {}
+    for instance in instances:
+        region = instance.cloud_cg_fk.vpc_fk.region
+        subnet = instance.cloud_cg_fk.subnet_fk.name
+        security_groups = instance.cloud_cg_fk.securityGroup_fk.name
+        image_id = 'ami-a789ffcb'
+        instance_type = instance.size
+        name = instance.name
+        key_name = 'vmazzi'
+        instance_hash = {name: {'region': region, 'image_id': image_id, 'instance_type': instance_type, 'key_name': key_name, 'subnet': subnet, 'security_groups': [security_groups]}}
+        instances_hash.update(instance_hash)
+    key_name = "common:{}:cloud:instances".format(client.client_name.lower())
+    json_instances_hash = json.dumps(instances_hash)
+    Utils.redis_write(key_name, json_instances_hash)
+
 def cloud_options(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login:index'))
@@ -75,22 +92,29 @@ def vpc_list(request):
         return HttpResponseRedirect(reverse('login:index'))
     client_id = request.session.get('client_id')
     client = Client.objects.get(pk=client_id)
+    ec2_client = boto3.client('ec2')
     if request.method == "POST":
         form = VpcForm(request.POST)
+        platform = Platform.objects.get(pk=request.POST.get('platform'))
         if form.is_valid():
-            client.vpc_set.create(
+            network = client.vpc_set.create(
                         name = form.cleaned_data['name'],
                         cidr_block = form.cleaned_data['cidr_block'],
-                        region = form.cleaned_data['region'],
+                        platform_fk = platform,
                         description = form.cleaned_data['description'],
                     )
-        vpcs = client.vpc_set.all()
-        key_name = "common:{}:cloud:vpcs".format(client.client_name.lower())
-        vpcs_hash = vpc_redis_format(vpcs, client)
-        Utils.redis_write(key_name, vpcs_hash)
+            platform_network_id = CloudActions.create_network(network)
+            network.platform_network_id = platform_network_id
+            network.save()
+        #vpcs = client.vpc_set.all()
+        #key_name = "common:{}:cloud:vpcs".format(client.client_name.lower())
+        #vpcs_hash = vpc_redis_format(vpcs, client)
+        #Utils.redis_write(key_name, vpcs_hash)
         return HttpResponseRedirect(reverse('cloud:vpc_list'))
     vpcs = client.vpc_set.all()
+    platforms = Platform.objects.all()
     form = VpcForm()
+    vpcs_hash = ec2_client.describe_vpcs()
     for field in form.fields:
         form.fields[field].widget.__dict__['attrs'].update({'class': 'form-control'})
         if (field == 'description' or field == 'ca_crt'):
@@ -98,17 +122,23 @@ def vpc_list(request):
     return render(request, 'cloud/cloud_vpc_list.html', {
         'form': form,
         'vpcs': vpcs,
+        'platforms': platforms,
+        'vpcs_hash': json.dumps(vpcs_hash),
         })
 
 def vpc_delete(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login:index'))
     vpc = Vpc.objects.get(pk=request.POST.get('vpc_id'))
+   # ec2 = boto3.resource('ec2')
+   # vpc = ec2.vpc(vpc_id)
+    CloudActions.delete_network(vpc)
     vpc.delete()
-    vpcs = client.vpc_set.all()
-    key_name = "common:{}:cloud:vpcs".format(client.client_name.lower())
-    vpcs_hash = vpc_redis_format(vpcs)
-    Utils.redis_write(key_name, vpcs_hash)
+   # vpc.delete()
+   # vpcs = client.vpc_set.all()
+   # key_name = "common:{}:cloud:vpcs".format(client.client_name.lower())
+   # vpcs_hash = vpc_redis_format(vpcs)
+   # Utils.redis_write(key_name, vpcs_hash)
     return HttpResponseRedirect(reverse('cloud:vpc_list'))
 
 def vpc_edit(request, vpc_id):
@@ -377,4 +407,45 @@ def subnets_sgs_roles(request):
         obj_hash['roles'].update(tmp_hash)
     return HttpResponse(json.dumps(obj_hash), content_type="application/json")
 
+def instance_list(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login:index'))
+    client_id = request.session.get('client_id')
+    client = Client.objects.get(pk=client_id)
+    cloud_cgs = CloudConfigurationGroup.objects.filter(client_fk=client)
+    if request.method == 'POST':
+        instance_size = request.POST.get('size')
+        cloud_cg = CloudConfigurationGroup.objects.get(pk=request.POST.get('cloud_cg'))
+        form = CloudInstanceForm(request.POST)
+        if form.is_valid():
+            client.cloudinstance_set.create(
+                        name = form.cleaned_data['name'],
+                        description = form.cleaned_data['description'],
+                        cloud_cg_fk = cloud_cg,
+                        size = instance_size,
+                    )
+            instances = CloudInstance.objects.filter(client_fk=client)
+            instance_redis_format(instances, client)
+        return HttpResponseRedirect(reverse('cloud:instance_list'))
+    instances = CloudInstance.objects.filter(client_fk=client)
+    form = CloudInstanceForm()
+    for field in form.fields:
+        form.fields[field].widget.__dict__['attrs'].update({'class': 'form-control'})
+        if (field == 'description'):
+            form.fields[field].widget.__dict__['attrs'].update({'class': 'form-control autogrow'})
+    return render(request, 'cloud/cloud_instance_list.html', {
+            'form': form,
+            'cloud_cgs': cloud_cgs,
+            'instances': instances,
+        })
 
+def instance_delete(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login:index'))
+    client_id = request.session.get('client_id')
+    client = Client.objects.get(pk=client_id)
+    instance = CloudInstance.objects.get(pk=request.POST.get('instance_id'))
+    instance.delete()
+    instances = CloudInstance.objects.filter(client_fk=client)
+    instance_redis_format(instances, client)
+    return HttpResponseRedirect(reverse('cloud:instance_list'))

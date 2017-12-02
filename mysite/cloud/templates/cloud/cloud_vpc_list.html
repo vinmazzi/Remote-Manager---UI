@@ -1,7 +1,7 @@
 {% extends 'group/header.html' %}
 {% load static %}
 {% block title %}
-Triamvos Cloud VPC
+Triamvos Cloud Network
 {% endblock %}
 {% block content %}
 <script type="text/javascript">
@@ -40,10 +40,10 @@ function send_or_edit (my_action, my_form) {
               <a href="layout-api.html">Triamvos Cloud</a>
           </li>
         <li class="active">
-              <strong>Triamvos Cloud VPC</strong>
+              <strong>Triamvos Cloud Network</strong>
           </li>
           </ol>
-<h2>Cloud VPC</h2>
+<h2>Cloud Network</h2>
 <br/ >
 <div class="row">
   <div class="col-md-12">
@@ -51,13 +51,13 @@ function send_or_edit (my_action, my_form) {
          <li class="active">
            <a href="#home" data-toggle="tab">
              <span class="visible-xs"><i class="entypo-home"></i></span>
-             <span class="hidden-xs">VPC List</span>
+             <span class="hidden-xs">Network List</span>
            </a>
          </li>
          <li>
            <a href="#profile" data-toggle="tab">
              <span class="visible-xs"><i class="entypo-user"></i></span>
-             <span class="hidden-xs">Add VPC</span>
+             <span class="hidden-xs">Add Network</span>
            </a>
          </li>
    </ul>
@@ -73,10 +73,10 @@ function send_or_edit (my_action, my_form) {
                       <input type="checkbox" id="chk-1">
                     </div>
                   </th>
-                  <th>VPC Name</th>
-                  <th>VPC Network</th>
-                  <th>VPC Region</th>
-                  <th>VPC Description</th>
+                  <th>Network Name</th>
+                  <th>Network Network</th>
+                  <th>Network Platform</th>
+                  <th>Network Description</th>
                   <th></th>
                 </tr>
               </thead>
@@ -93,10 +93,10 @@ function send_or_edit (my_action, my_form) {
                   </td>
                   <td>{{vpc.name}}</td>
                   <td>{{vpc.cidr_block}}</td>
-                  <td>{{vpc.region}}</td>
+                  <td>{% if vpc.platform_fk.alias == "AWS" %} <i class="fa fa-amazon"></i>&nbsp; Amazon Web Services {% endif %}</td>
                   <td>{{vpc.description}}</td>
                   <td>
-                    <a href="#" onclick="show_modal({{ vpc.pk }});" class="btn btn-default btn-sm btn-icon icon-left"> <i class="entypo-pencil"></i> Edit </a>
+                    <!-- <a href="#" onclick="show_modal({{ vpc.pk }});" class="btn btn-default btn-sm btn-icon icon-left"> <i class="entypo-pencil"></i> Edit </a> -->
                     <a href="#" name="form-{{vpc.pk}}" class="btn btn-danger btn-sm btn-icon icon-left" onclick="send_or_edit('delete', this.name);">
 
                       <i class="entypo-cancel"></i>
@@ -114,7 +114,7 @@ function send_or_edit (my_action, my_form) {
        <div class="panel panel-primary" data-collapsed="0">
           <div class="panel-heading">
             <div class="panel-title">
-              Add New VPC to the Cloud
+              Add New Network to the Cloud
             </div>
           </div>
             <div class="panel-body">
@@ -133,11 +133,27 @@ function send_or_edit (my_action, my_form) {
                   </div>
                 </div>
                 <div class="form-group">
+                  <label for="field-1" class="col-sm-3 control-label">Platform: </label>
+                  <div class="col-sm-3">
+                    <select name="platform" required="true" id="platform" class="select2" data-allow-clear="true" data-placeholder="Platform">
+                    <option></option>
+                    {% for platform in platforms %}
+                    <span class="selectboxit-option-icon-container">
+                    <i class="fa fa-amazon"></i>
+                    </span>
+                    <option value="{{platform.pk}}">{{platform.name}}</option>
+                    {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <!--
+                <div class="form-group">
                   <label for="field-1" class="col-sm-3 control-label">{{ form.region.label_tag }}</label>
                   <div class="col-sm-3">
                     {{ form.region }}
                   </div>
                 </div>
+                -->
                 <div class="form-group">
                   <label for="field-1" class="col-sm-3 control-label">{{ form.description.label_tag }}</label>
                   <div class="col-sm-3">
