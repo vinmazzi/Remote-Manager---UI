@@ -22,6 +22,22 @@ function show_modal(subnet_id){
        }
      });
 }
+$(document).ready(function() {
+  $("#platform").change(function() {
+    $("#vpc").find('option').remove();
+    $platform_id = $("#platform").val();
+    $.ajax({
+      url: "/cloud/"+ $platform_id +"/get_vpcs_by_platform",
+      contentType: "application/json; charset=utf-8",
+      success: function(response){
+        $.each(response, function(key, value){
+          $("#vpc").append($("<option></option>").attr("value", value).text(key));
+        });
+      }
+    });
+  });
+});
+  
 </script>
            <script type="text/javascript">
 function send_or_edit (my_action, my_form) {
@@ -75,9 +91,10 @@ function send_or_edit (my_action, my_form) {
                     </div>
                   </th>
                   <th>Subnet Name</th>
-                  <th>Subnet Network</th>
-                  <th>Subnet Vpc</th>
-                  <th>Subnet Description</th>
+                  <th>Subnet</th>
+                  <th>Network</th>
+                  <th>Platform</th>
+                  <th>Description</th>
                   <th></th>
                 </tr>
               </thead>
@@ -95,6 +112,7 @@ function send_or_edit (my_action, my_form) {
                   <td>{{subnet.name}}</td>
                   <td>{{subnet.cidr_block}}</td>
                   <td>{{subnet.vpc_fk.name}}</td>
+                  <td>{% if subnet.platform_fk.alias == "AWS" %} <i class="fa fa-amazon"></i>&nbsp; Amazon Web Services {% endif %}</td>
                   <td>{{subnet.description}}</td>
                   <td>
                     <a href="#" onclick="show_modal({{ subnet.pk }});" class="btn btn-default btn-sm btn-icon icon-left"> <i class="entypo-pencil"></i> Edit </a>
@@ -128,9 +146,20 @@ function send_or_edit (my_action, my_form) {
                   </div>
                 </div>
                 <div class="form-group">
-                  <label for="field-1" class="col-sm-3 control-label">VPC: </label>
+                  <label for="field-1" class="col-sm-3 control-label">Platform: </label>
                   <div class="col-sm-3">
-                    <select name="vpc" required="true" id="vpc" class="select2" data-allow-clear="true" data-placeholder="Vpc">
+                    <select name="platform" required="true" id="platform" class="select2" data-allow-clear="true" data-placeholder="Platform">
+                    <option></option>
+                    {% for platform in platforms %}
+                    <option value="{{platform.pk}}">{{platform.name}}</option>
+                    {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="field-1" class="col-sm-3 control-label">Network: </label>
+                  <div class="col-sm-3">
+                    <select name="vpc" required="true" id="vpc" class="select2" data-allow-clear="true" data-placeholder="Network">
                     <option></option>
                     {% for vpc in vpcs %}
                     <option value="{{vpc.pk}}">{{vpc.name}}</option>
@@ -206,13 +235,13 @@ function send_or_edit (my_action, my_form) {
             </div>
           </div>
           <div class="form-group">
-            <label for="field-1" class="col-sm-3 control-label">Network: </label>
+            <label for="field-1" class="col-sm-3 control-label">Subnet: </label>
             <div class="col-sm-4">
               <input type="text" id="modal_subnet_network" name="modal_subnet_network" class="form-control" />
             </div>
           </div>
           <div class="form-group">
-            <label for="field-1" class="col-sm-3 control-label">VPC: </label>
+            <label for="field-1" class="col-sm-3 control-label">Network: </label>
             <div class="col-sm-4">
               <select name="modal_subnet_vpc" required="true" id="modal_subnet_vpc" class="select2" data-allow-clear="true" data-placeholder="Vpc">
               <option></option>

@@ -106,10 +106,6 @@ def vpc_list(request):
             platform_network_id = CloudActions.create_network(network)
             network.platform_network_id = platform_network_id
             network.save()
-        #vpcs = client.vpc_set.all()
-        #key_name = "common:{}:cloud:vpcs".format(client.client_name.lower())
-        #vpcs_hash = vpc_redis_format(vpcs, client)
-        #Utils.redis_write(key_name, vpcs_hash)
         return HttpResponseRedirect(reverse('cloud:vpc_list'))
     vpcs = client.vpc_set.all()
     platforms = Platform.objects.all()
@@ -130,15 +126,8 @@ def vpc_delete(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login:index'))
     vpc = Vpc.objects.get(pk=request.POST.get('vpc_id'))
-   # ec2 = boto3.resource('ec2')
-   # vpc = ec2.vpc(vpc_id)
     CloudActions.delete_network(vpc)
     vpc.delete()
-   # vpc.delete()
-   # vpcs = client.vpc_set.all()
-   # key_name = "common:{}:cloud:vpcs".format(client.client_name.lower())
-   # vpcs_hash = vpc_redis_format(vpcs)
-   # Utils.redis_write(key_name, vpcs_hash)
     return HttpResponseRedirect(reverse('cloud:vpc_list'))
 
 def vpc_edit(request, vpc_id):
@@ -166,22 +155,22 @@ def subnet_list(request):
     client_id = request.session.get('client_id')
     client = Client.objects.get(pk=client_id)
     vpcs = client.vpc_set.all()
+    platforms = Platform.objects.all()
     if request.method == 'POST':
         form = SubnetForm(request.POST)
         vpc = Vpc.objects.get(pk=request.POST.get('vpc'))
+        platform = Platform.objects.get(pk=request.POST.get('platform'))
         if form.is_valid():
-            vpc.subnet_set.create(
+           subnet = vpc.subnet_set.create(
                         name = form.cleaned_data['name'],
                         cidr_block = form.cleaned_data['cidr_block'],
                         description = form.cleaned_data['description'],
-                        region = vpc.region,
                         client_fk = vpc.client_fk,
-
+                        platform_fk = platform,
                     )
-        else:
-            return HttpResponse(form)
-        subnets = client.subnet_set.all()
-        subnets_hash = subnet_redis_format(subnets, client)
+           subnet_aws = CloudActions.create_subnet(subnet)
+           subnet.platform_subnet_id = subnet_aws
+           subnet.save()
         return HttpResponseRedirect(reverse('cloud:subnet_list'))
     subnets = client.subnet_set.all()
     form = SubnetForm()
@@ -191,9 +180,19 @@ def subnet_list(request):
             form.fields[field].widget.__dict__['attrs'].update({'class': 'form-control autogrow'})
     return render(request, 'cloud/cloud_subnet_list.html', {
             'form': form,
-            'vpcs': vpcs,
+            'platforms': platforms,
             'subnets': subnets,
         })
+
+def get_vpcs_by_platform(request, platform_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login:index'))
+    platform = Platform.objects.get(id=platform_id)
+    vpcs = Vpc.objects.filter(platform_fk=platform)
+    vpc_hash = {}
+    for vpc in vpcs:
+        vpc_hash.update({vpc.name: vpc.pk})
+    return HttpResponse(json.dumps(vpc_hash), content_type="application/json")
 
 def subnet_delete(request):
     if not request.user.is_authenticated:

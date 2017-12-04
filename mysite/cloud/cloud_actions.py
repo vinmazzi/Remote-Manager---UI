@@ -31,6 +31,13 @@ class Aws:
         igw.create_tags(Tags=[{'Key': 'Name', 'Value': igw_name}])
         return igw
     
+    def create_subnet(vpc_id, subnet_name, cidr_block):
+        subnet_id = Aws.client.create_subnet(AvailabilityZone='sa-east-1c',VpcId=vpc_id, CidrBlock=cidr_block)['Subnet']['SubnetId']
+        subnet = Aws.ec2.Subnet(subnet_id)
+        subnet.meta.client.modify_subnet_attribute(SubnetId=subnet_id, MapPublicIpOnLaunch={'Value': True})
+        subnet.create_tags(Tags=[{'Key': 'Name', 'Value': subnet_name}])
+        return subnet_id
+
     def get_vpc_route_table(vpc_id):
         rts = Aws.client.describe_route_tables()
         for rt in rts['RouteTables']:
@@ -42,11 +49,13 @@ class Aws:
 class CloudActions:
     def create_network(network):
         if network.platform_fk.alias == "AWS":
-            vpc_id = Aws.create_vpc(network.name, network.cidr_block, True)
+            vpc_id = aws.create_vpc(network.name, network.cidr_block, true)
             return vpc_id
 
     def create_subnet(subnet):
-        return "subnet id"
+        if subnet.platform_fk.alias == "AWS":
+            subnet_id = Aws.create_subnet(subnet.vpc_fk.platform_network_id, subnet.name, subnet.cidr_block)
+            return subnet_id
 
     def delete_network(network):
         if network.platform_fk.alias == "AWS":

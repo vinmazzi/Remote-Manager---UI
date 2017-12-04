@@ -31,6 +31,7 @@ class Subnet(models.Model):
     client_fk = models.ForeignKey(Client, on_delete=models.CASCADE, default=0)
     platform_fk = models.ForeignKey(Platform, on_delete=models.CASCADE, null=True, blank=True)
     description = models.CharField(max_length=100, default="N/A")
+    platform_subnet_id = models.CharField(max_length=100, default="N/A", null=True, blank=True)
 
     def __str__(self):
         return self.name
