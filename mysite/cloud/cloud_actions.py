@@ -38,6 +38,10 @@ class Aws:
         subnet.create_tags(Tags=[{'Key': 'Name', 'Value': subnet_name}])
         return subnet_id
 
+    def delete_subnet(subnet_id):
+        subnet = Aws.ec2.Subnet(subnet_id)
+        subnet.delete()
+
     def get_vpc_route_table(vpc_id):
         rts = Aws.client.describe_route_tables()
         for rt in rts['RouteTables']:
@@ -56,6 +60,10 @@ class CloudActions:
         if subnet.platform_fk.alias == "AWS":
             subnet_id = Aws.create_subnet(subnet.vpc_fk.platform_network_id, subnet.name, subnet.cidr_block)
             return subnet_id
+
+    def delete_subnet(subnet):
+        if subnet.platform_fk.alias == "AWS":
+            Aws.delete_subnet(subnet.platform_subnet_id)
 
     def delete_network(network):
         if network.platform_fk.alias == "AWS":

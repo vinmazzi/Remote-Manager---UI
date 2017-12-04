@@ -198,10 +198,8 @@ def subnet_delete(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login:index'))
     subnet = Subnet.objects.get(pk=request.POST.get('subnet_id'))
-    client = subnet.client_fk
+    CloudActions.delete_subnet(subnet)
     subnet.delete()
-    subnets = client.subnet_set.all()
-    subnet_redis_format(subnets, client)
     return HttpResponseRedirect(reverse('cloud:subnet_list'))
 
 def subnet_edit(request, subnet_id):
