@@ -191,7 +191,7 @@ def get_vpcs_by_platform(request, platform_id):
     vpcs = Vpc.objects.filter(platform_fk=platform)
     vpc_hash = {}
     for vpc in vpcs:
-        vpc_hash.update({vpc.name: vpc.pk})
+        vpc_hash.update({"{} ({})".format(vpc.name, vpc.cidr_block): vpc.pk})
     return HttpResponse(json.dumps(vpc_hash), content_type="application/json")
 
 def subnet_delete(request):
@@ -224,17 +224,21 @@ def fwrule_group_list(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login:index'))
     if request.method == "POST":
+        platform = Platform.objects.get(pk=request.POST.get('platform'))
         vpc = Vpc.objects.get(pk=request.POST.get('vpc'))
         form = SecurityGroupForm(request.POST) 
         if form.is_valid():
-            vpc.securitygroup_set.create(
+            sg = vpc.securitygroup_set.create(
                         name = form.cleaned_data['name'],
+                        platform_fk = platform,
                         vpc_fk = vpc,
                         client_fk = vpc.client_fk,
                         description = form.cleaned_data['description'],
                     )
+            sg.platform_sg_id = CloudActions.create_security_group(sg)
+            sg.save()
     form = SecurityGroupForm()
-    vpcs = Vpc.objects.all()
+    platforms = Platform.objects.all()
     sgs = SecurityGroup.objects.all()
     for field in form.fields:
         form.fields[field].widget.__dict__['attrs'].update({'class': 'form-control'})
@@ -242,7 +246,7 @@ def fwrule_group_list(request):
             form.fields[field].widget.__dict__['attrs'].update({'class': 'form-control autogrow'})
     return render(request, 'cloud/cloud_sg_list.html', {
             'form': form,
-            'vpcs': vpcs,
+            'platforms': platforms,
             'sgs': sgs,
         })
 
@@ -269,9 +273,9 @@ def fwrule_group_delete(request):
     sg_id = request.POST.get('sg_id')
     sg = SecurityGroup.objects.get(pk=sg_id) 
     client = sg.client_fk
+    CloudActions.delete_security_group(sg)
     sg.delete()
     sgs = client.securitygroup_set.all()
-    sg_redis_format(sgs, client)
     return HttpResponseRedirect(reverse('cloud:fwrule_group_list'))
 
 def fwrule_group_rule_edit(request, sg_id):
@@ -309,16 +313,17 @@ def fwrule_group_rule_create(request):
     rule_hash = eval(request)
     sg = SecurityGroup.objects.get(pk=rule_hash['sg_id'])
     client = sg.client_fk
-    sg.securitygroup_rule_set.create(
+    rule = sg.securitygroup_rule_set.create(
                 name = rule_hash['description'],   
                 description = rule_hash['description'],   
                 protocol = rule_hash['protocol'],   
                 port = rule_hash['port_range'],   
                 cidr = rule_hash['source'],   
             )
+    CloudActions.create_security_group_rule(sg, model_to_dict(rule))
     ret = {'ret': request}
-    sgs = client.securitygroup_set.all()
-    sg_redis_format(sgs, client)
+    #sgs = client.securitygroup_set.all()
+    #sg_redis_format(sgs, client)
     return HttpResponse(json.dumps(ret), content_type="application/json")
 
 def configuration_group_list(request):

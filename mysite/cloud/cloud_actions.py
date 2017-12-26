@@ -38,9 +38,22 @@ class Aws:
         subnet.create_tags(Tags=[{'Key': 'Name', 'Value': subnet_name}])
         return subnet_id
 
+    def create_security_group(vpc_id, sg_name, description):
+        return Aws.client.create_security_group(Description=description, GroupName=sg_name, VpcId=vpc_id)['GroupId']
+
+    def create_security_group_rule(sg_id, rule_hash):
+        print(sg_id)
+        sg = Aws.ec2.SecurityGroup(sg_id)
+        ip_permition_hash = {'FromPort': int(rule_hash['port']), 'ToPort': int(rule_hash['port']), 'IpProtocol': rule_hash['protocol'], 'IpRanges': [{'CidrIp': rule_hash['cidr'], 'Description': rule_hash['description']}]}
+        sg.authorize_ingress(IpPermissions=[ip_permition_hash])
+
     def delete_subnet(subnet_id):
         subnet = Aws.ec2.Subnet(subnet_id)
         subnet.delete()
+
+    def delete_security_group(sg_id):
+        sg = Aws.ec2.SecurityGroup(sg_id)
+        sg.delete()
 
     def get_vpc_route_table(vpc_id):
         rts = Aws.client.describe_route_tables()
@@ -69,3 +82,14 @@ class CloudActions:
         if network.platform_fk.alias == "AWS":
             Aws.delete_vpc(network.platform_network_id)
 
+    def create_security_group(sg):
+        if sg.platform_fk.alias == "AWS":
+            return Aws.create_security_group(sg.vpc_fk.platform_network_id, sg.name, sg.description)
+
+    def create_security_group_rule(sg, rule):
+        if sg.platform_fk.alias == "AWS":
+            return Aws.create_security_group_rule(sg.platform_sg_id, rule)
+
+    def delete_security_group(sg):
+        if sg.platform_fk.alias == "AWS":
+            return Aws.delete_security_group(sg.platform_sg_id)
