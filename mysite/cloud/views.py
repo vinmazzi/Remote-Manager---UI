@@ -300,6 +300,7 @@ def fwrule_group_rule_delete(request):
     rule_id = request.body.decode('utf8').split('=')[1]
     rule = SecurityGroup_Rule.objects.get(pk=rule_id) 
     client = rule.securityGroup_fk.client_fk
+    CloudActions.delete_security_group_rule(rule.securityGroup_fk, model_to_dict(rule))
     rule.delete()
     sgs = client.securitygroup_set.all()
     sg_redis_format(sgs, client)
